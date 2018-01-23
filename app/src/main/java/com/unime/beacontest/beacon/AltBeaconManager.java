@@ -22,9 +22,11 @@ public class AltBeaconManager {
         switch (action) {
             case AltBeaconUtils.ACTION_ALT_BEACON_SCANNING:
                 // Log.d(TAG, "startAltBeaconService: start");
-                Intent startReceiverIntentService = new Intent(getContext(), ReceiverIntentService.class);
+                Intent startReceiverIntentService = new Intent(getContext(), ReceiverService.class);
                 getContext().startService(startReceiverIntentService);
                 break;
         }
     }
+
+
 }
