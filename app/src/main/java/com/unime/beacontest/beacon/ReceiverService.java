@@ -8,6 +8,8 @@ import android.os.IBinder;
 import java.util.Random;
 
 public class ReceiverService extends Service {
+    public static final String TAG = "ReceiverService";
+
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
     // Random number generator
@@ -29,9 +31,10 @@ public class ReceiverService extends Service {
         return mBinder;
     }
 
-    /** method for clients */
-//    public int getRandomNumber() {
-//        return mGenerator.nextInt(100);
-//    }
+    public void scanning () {
+        BeaconReceiver mBeaconReceiver = new BeaconReceiver();
+
+    }
+
 
 }

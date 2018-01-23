@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.unime.beacontest.beacon.ReceiverService;
 import com.unime.beacontest.beacon.ReceiverService.LocalBinder;
@@ -50,11 +49,12 @@ public class MainActivity extends AppCompatActivity {
     public void onButtonClick(View v) {
         Log.d(TAG, "onButtonClick: start");
         if (mBound) {
+            Log.d(TAG, "onButtonClick: bounded");
             // Call a method from the LocalService.
             // However, if this call were something that might hang, then this request should
             // occur in a separate thread to avoid slowing down the activity performance.
-            int num = mService.getRandomNumber();
-            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
+            mService.scanBeacons();
+//            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
 
         }
     }
