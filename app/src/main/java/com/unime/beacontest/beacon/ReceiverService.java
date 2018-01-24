@@ -5,15 +5,11 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import java.util.Random;
-
 public class ReceiverService extends Service {
     public static final String TAG = "ReceiverService";
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
-    // Random number generator
-    private final Random mGenerator = new Random();
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -32,8 +28,8 @@ public class ReceiverService extends Service {
     }
 
     public void scanning () {
-        BeaconReceiver mBeaconReceiver = new BeaconReceiver();
-
+        BeaconReceiver mBeaconReceiver = new BeaconReceiver(this);
+        mBeaconReceiver.startScanning("");
     }
 
 
