@@ -1,5 +1,7 @@
 package com.unime.beacontest.beacon.utils;
+
 import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class BeaconModel {
@@ -146,6 +148,11 @@ public class BeaconModel {
         return null;
     }
 
+    public static int findTxPower(final byte[] data) {
+        String txPower = String.format("%d", data[TXPOWER_INDEX]);
+        return Integer.parseInt(txPower);
+    }
+
 
     @Override
     public String toString() {
@@ -153,20 +160,20 @@ public class BeaconModel {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        try {
-            BeaconModel beaconModel = (BeaconModel) obj;
-            if(null == beaconModel){
-                return true;
-            } else if (beaconModel.getUuid().equals(this.getUuid())
-                    && beaconModel.getMinor().equals(this.getMinor())
-                    && beaconModel.getMajor().equals(this.getMajor())) {
-                return true;
-            }
-        } catch (ClassCastException e) {
-            e.printStackTrace();
+    public boolean equals(Object o) {
+
+        if (o == this) return true;
+        if (!(o instanceof BeaconModel)) {
             return false;
         }
-        return false;
+        BeaconModel beaconModel = (BeaconModel) o;
+        return Objects.equals(getUuid(), beaconModel.getUuid()) &&
+                Objects.equals(getMajor(), beaconModel.getMajor()) &&
+                Objects.equals(getMinor(), beaconModel.getMinor());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getUuid(), getMajor(), getMinor());
     }
 }

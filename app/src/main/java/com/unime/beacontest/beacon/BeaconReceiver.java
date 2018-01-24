@@ -65,8 +65,6 @@ public class BeaconReceiver {
         return new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, final ScanResult result) {
-//                Log.i("callbackType", String.valueOf(callbackType));
-//                Log.i("result", result.toString());
                 final int RSSI = result.getRssi();
 
                 if (RSSI >= SIGNAL_THRESHOLD) {
@@ -78,21 +76,24 @@ public class BeaconReceiver {
 
                                     Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
                                     byte[] data = result.getScanRecord().getBytes();
+                                    BeaconModel beaconDetected = null;
 
-                                    BeaconModel beaconDetected = new BeaconModel(
-                                            BeaconModel.findUUID(data),
-                                            BeaconModel.findMajor(data),
-                                            BeaconModel.findMinor(data),
-                                            result.getRssi(), // API 26 required getTxPower method
-                                            result.getRssi(),
-                                            result.getTimestampNanos(),
-                                            device.getAddress()
-                                    );
-
-                                    founded.add(beaconDetected);
+                                    if(BeaconModel.isBeacon(data)){
+                                        beaconDetected = new BeaconModel(
+                                                BeaconModel.findUUID(data),
+                                                BeaconModel.findMajor(data),
+                                                BeaconModel.findMinor(data),
+                                                BeaconModel.findTxPower(data), // API 26 required getTxPower method
+                                                result.getRssi(),
+                                                result.getTimestampNanos(),
+                                                device.getAddress()
+                                        );
+                                        founded.add(beaconDetected);
+                                    }
                                     Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
                                              " major: " + beaconDetected.getMajor() +
                                              " minor: " + beaconDetected.getMinor() + "\n");
+                                    Log.d(TAG, "set: " + founded);
                                 }
                             });
                 }
