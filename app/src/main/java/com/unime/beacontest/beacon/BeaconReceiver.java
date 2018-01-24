@@ -12,6 +12,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
+import com.unime.beacontest.beacon.utils.BeaconModel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,11 +28,13 @@ public class BeaconReceiver {
     private ScanCallback callback;
     private ScanSettings settings;
     private List<ScanFilter> filters;
+    private List<BeaconModel> founded;
 
     public BeaconReceiver(Context context) {
         this.context = context;
 
         mBluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        founded = new ArrayList<>();
 
     }
 
@@ -72,7 +76,7 @@ public class BeaconReceiver {
                                     BluetoothDevice device = result.getDevice();
 
                                     Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
-                                    getUUID(result);
+                                    
                                 }
                             });
                 }
@@ -80,10 +84,10 @@ public class BeaconReceiver {
         };
     }
 
-    private static String getUUID(ScanResult result){
+    private static String getBeaconID(ScanResult result){
         String UUIDx = UUID
-                .nameUUIDFromBytes(result.getScanRecord().getBytes()).toString();
         // ToastMakers.message(scannerActivity.getApplicationContext(), UUIDx);
+
         Log.e("UUID", " as String ->>" + UUIDx);
         return UUIDx;
     }
@@ -93,6 +97,9 @@ public class BeaconReceiver {
         return new ArrayList<>();
     }
 
+    public class BeaconID {
+
+    }
 
 
 }
