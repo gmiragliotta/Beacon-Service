@@ -38,7 +38,7 @@ public class BeaconModel {
     private static final int AD_TYPE_VALUE = 0xff;
     private static final int BEACON_CODE_VALUE = 0xbeac;
 
-    BeaconModel(String uuid, String major, String minor, int txPower, int rssi, long timestamp, String address){
+    public BeaconModel(String uuid, String major, String minor, int txPower, int rssi, long timestamp, String address){
         this.uuid = uuid;
         //this.arguments = arguments;
         this.major = major;
@@ -50,7 +50,7 @@ public class BeaconModel {
 
     }
 
-    protected String getUuid(){
+    public String getUuid(){
         return this.uuid;
     }
 
@@ -58,27 +58,27 @@ public class BeaconModel {
         return this.arguments;
     }*/
 
-    protected String getMajor(){
+    public String getMajor(){
         return this.major;
     }
 
-    protected String getMinor(){
+    public String getMinor(){
         return this.minor;
     }
 
-    protected int getTxPower(){
+    public int getTxPower(){
         return this.txPower;
     }
 
-    protected int getRssi(){
+    public int getRssi(){
         return this.rssi;
     }
 
-    protected long getTimestamp(){
+    public long getTimestamp(){
         return this.timestamp;
     }
 
-    protected String getAddress(){
+    public String getAddress(){
         return this.address;
     }
 
@@ -86,15 +86,15 @@ public class BeaconModel {
         this.arguments = arguments;
     }*/
 
-    protected void setMajor(String major){
+    public void setMajor(String major){
         this.major = major;
     }
 
-    protected void setMinor(String minor){
+    public void setMinor(String minor){
         this.minor = minor;
     }
 
-    protected void setTimestamp(long timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -152,4 +152,21 @@ public class BeaconModel {
         return "Uuid: "+ this.uuid + "\nMajor: " + this.major + "\nMinor: " + this.minor + " TxPower: " + this.txPower + " RSSI: " + this.rssi + "\nAddress: " + this.address + "\n";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            BeaconModel beaconModel = (BeaconModel) obj;
+            if(null == beaconModel){
+                return true;
+            } else if (beaconModel.getUuid().equals(this.getUuid())
+                    && beaconModel.getMinor().equals(this.getMinor())
+                    && beaconModel.getMajor().equals(this.getMajor())) {
+                return true;
+            }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return false;
+    }
 }

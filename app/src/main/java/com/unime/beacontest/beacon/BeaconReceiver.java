@@ -15,8 +15,9 @@ import android.util.Log;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
@@ -28,13 +29,13 @@ public class BeaconReceiver {
     private ScanCallback callback;
     private ScanSettings settings;
     private List<ScanFilter> filters;
-    private List<BeaconModel> founded;
+
+    private static Set<BeaconModel> founded = new HashSet<>();
 
     public BeaconReceiver(Context context) {
         this.context = context;
 
         mBluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
-        founded = new ArrayList<>();
 
     }
 
@@ -76,7 +77,22 @@ public class BeaconReceiver {
                                     BluetoothDevice device = result.getDevice();
 
                                     Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
-                                    
+                                    byte[] data = result.getScanRecord().getBytes();
+
+                                    BeaconModel beaconDetected = new BeaconModel(
+                                            BeaconModel.findUUID(data),
+                                            BeaconModel.findMajor(data),
+                                            BeaconModel.findMinor(data),
+                                            result.getRssi(), // API 26 required getTxPower method
+                                            result.getRssi(),
+                                            result.getTimestampNanos(),
+                                            device.getAddress()
+                                    );
+
+                                    founded.add(beaconDetected);
+                                    Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+                                             " major: " + beaconDetected.getMajor() +
+                                             " minor: " + beaconDetected.getMinor() + "\n");
                                 }
                             });
                 }
@@ -84,22 +100,8 @@ public class BeaconReceiver {
         };
     }
 
-    private static String getBeaconID(ScanResult result){
-        String UUIDx = UUID
-        // ToastMakers.message(scannerActivity.getApplicationContext(), UUIDx);
-
-        Log.e("UUID", " as String ->>" + UUIDx);
-        return UUIDx;
-    }
-
     private static List<ScanFilter> getScanFilters(){
         // TODO ADD FILTERS HERE
         return new ArrayList<>();
     }
-
-    public class BeaconID {
-
-    }
-
-
 }
