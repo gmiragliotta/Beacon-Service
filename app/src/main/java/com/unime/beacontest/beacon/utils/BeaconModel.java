@@ -1,5 +1,7 @@
 package com.unime.beacontest.beacon.utils;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -21,12 +23,6 @@ public class BeaconModel {
     // ID of the beacon, in case of Android it will be Bluetooth MAC address
     private String address;
 
-    //lista contenente il MAC address di ogni timbratrice compatibile
-    public static final ArrayList<String> lista_timbratrici = new ArrayList<String>();
-    static{
-        lista_timbratrici.add("00:1A:7D:DA:71:03");
-        lista_timbratrici.add("B8:27:EB:6A:57:34");
-    }
 
     private static final int PROTOCOL_OFFSET = 3;
     private static final int AD_LENGTH_INDEX = 0 + PROTOCOL_OFFSET;
@@ -112,8 +108,10 @@ public class BeaconModel {
     }
 
     public static String findUUID(final byte[] data){
+        Log.e("Guarda qui", "findUUID: " + data.length );
         StringBuilder sb = new StringBuilder();
         for(int i = UUID_START_INDEX, offset = 0; i <= UUID_STOP_INDEX; ++i, ++offset) {
+            Log.e("Guarda qui", "findUUID INDEX: " + i );
             sb.append(String.format("%02x", (int)(data[i] & 0xff)));
             if (offset == 3 || offset == 5 || offset == 7 || offset == 9) {
                 sb.append("-");

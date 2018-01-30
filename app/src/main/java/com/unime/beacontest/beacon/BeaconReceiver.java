@@ -91,9 +91,13 @@ public class BeaconReceiver {
                                         );
                                         founded.add(beaconDetected);
                                     }
-                                    Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-                                             " major: " + beaconDetected.getMajor() +
-                                             " minor: " + beaconDetected.getMinor() + "\n");
+                                    try {
+                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+                                                " major: " + beaconDetected.getMajor() +
+                                                " minor: " + beaconDetected.getMinor() + "\n");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                     Log.d(TAG, "set: " + founded);
                                 }
                             });
@@ -104,11 +108,11 @@ public class BeaconReceiver {
 
     private static List<ScanFilter> getScanFilters(){
         ScanFilterUtils.CustomFilter uuidFilter = new ScanFilterUtils.CustomFilter(
-                "00000000000000000000000000000000", 2, 18);
+                "00000000-0000-0000-0000-000000000001", 0, 15);
         ScanFilterUtils.CustomFilter majorFilter = new ScanFilterUtils.CustomFilter(
-                "0001", 19, 20);
+                "0000", 0, 1);
         ScanFilterUtils.CustomFilter minorFilter = new ScanFilterUtils.CustomFilter(
-                "0001", 21, 22);
+                "0001", 0, 1);
 
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(ScanFilterUtils.getScanFilter(uuidFilter, majorFilter, minorFilter));
