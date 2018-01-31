@@ -10,6 +10,10 @@ public class Filter {
     public static final int MINOR_START_INDEX = MAJOR_END_INDEX + 1;
     public static final int MINOR_END_INDEX = MINOR_START_INDEX + 1;
 
+    public static final int UUID_TYPE = 0;
+    public static final int MAJOR_TYPE = 1;
+    public static final int MINOR_TYPE = 2;
+
 
     private int type;
     private String data;

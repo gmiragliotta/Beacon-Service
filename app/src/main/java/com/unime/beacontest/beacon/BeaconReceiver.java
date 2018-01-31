@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.CustomFilter;
+import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import java.util.ArrayList;
@@ -107,9 +109,13 @@ public class BeaconReceiver {
     }
 
     private static List<ScanFilter> getScanFilters(){
-
         List<ScanFilter> filters = new ArrayList<>();
-        filters.add(ScanFilterUtils.getScanFilter(uuidFilter, majorFilter, minorFilter));
+
+        CustomFilter customFilter = new CustomFilter();
+        customFilter.addFilter(new Filter(Filter.UUID_TYPE, "01", 15, 15));
+        customFilter.build();
+
+        filters.add(ScanFilterUtils.getScanFilter(customFilter));
 
         return filters;
     }
