@@ -3,6 +3,8 @@ package com.unime.beacontest.beacon.utils;
 import android.bluetooth.le.ScanFilter;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ScanFilterUtils {
@@ -82,27 +84,31 @@ public class ScanFilterUtils {
         return builder.build();
     }
 
-    public static class CustomFilter {
-        private String data;
-        private int startIndexFilter;
-        private int endIndexFilter;
+    public class CustomFilter {
+        private List<Filter> filters;
+        private BeaconModel beaconModel;
+        private byte[] manufacturerDataMask;
 
-        public CustomFilter (String data, int startIndexFilter, int endIndexFilter){
-            this.data = data;
-            this.startIndexFilter = startIndexFilter;
-            this.endIndexFilter = endIndexFilter;
+        public CustomFilter() {
+            filters = new ArrayList<>();
         }
 
-        public String getData() {
-            return data;
+        public List<Filter> getFilters() {
+            return filters;
         }
 
-        public int getStartIndexFilter() {
-            return startIndexFilter;
-        }
+        public class Builder {
+            public void addFilter(Filter filter) {
+                getFilters().add(filter);
+            }
 
-        public int getEndIndexFilter() {
-            return endIndexFilter;
+            public CustomFilter build() {
+                if(getFilters().size() == 0)
+                    return null;
+
+                
+
+            }
         }
     }
 }

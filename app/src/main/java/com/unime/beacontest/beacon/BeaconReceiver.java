@@ -107,12 +107,6 @@ public class BeaconReceiver {
     }
 
     private static List<ScanFilter> getScanFilters(){
-        ScanFilterUtils.CustomFilter uuidFilter = new ScanFilterUtils.CustomFilter(
-                "00000000-0000-0000-0000-000000000001", 0, 15);
-        ScanFilterUtils.CustomFilter majorFilter = new ScanFilterUtils.CustomFilter(
-                "0000", 0, 1);
-        ScanFilterUtils.CustomFilter minorFilter = new ScanFilterUtils.CustomFilter(
-                "0001", 0, 1);
 
         List<ScanFilter> filters = new ArrayList<>();
         filters.add(ScanFilterUtils.getScanFilter(uuidFilter, majorFilter, minorFilter));
