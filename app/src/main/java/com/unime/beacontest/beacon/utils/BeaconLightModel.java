@@ -8,6 +8,8 @@ public class BeaconLightModel {
     private String major;
     private String minor;
 
+    public static final String TAG = "BeaconLightModel";
+
     public BeaconLightModel() {
 
     }
@@ -16,18 +18,16 @@ public class BeaconLightModel {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
-        char[] uuidCharArray = uuid.toCharArray();
-
+    public void setUuid(char[] uuidCharArray) {
         StringBuilder sb = new StringBuilder();
 
-        for(int i=0, dash=1; i < uuid.length(); i++, dash++) {
+        for(int i=0, dash=1; i < uuidCharArray.length; i++, dash++) {
             sb.append(uuidCharArray[i]);
-            if(dash == 8 || dash == 12 || dash == 16 || dash == 20){
+            if(dash == 8 || dash == 12 || dash == 16 || dash == 20) {
                 sb.append("-");
             }
         }
-
+//        Log.d("BeaconLightModel", "setUuid: " + sb.toString());
         this.uuid = sb.toString();
     }
 
@@ -35,15 +35,28 @@ public class BeaconLightModel {
         return major;
     }
 
-    public void setMajor(String major) {
-        this.major = major;
+    public void setMajor(char[] major) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i=0; i<major.length; i++)
+            sb.append(major[i]);
+
+//        Log.d(TAG, "setMajor: " + sb.toString());
+        this.major = sb.toString();
     }
 
     public String getMinor() {
         return minor;
     }
 
-    public void setMinor(String minor) {
-        this.minor = minor;
+    public void setMinor(char[] minor) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i=0; i<minor.length; i++)
+            sb.append(minor[i]);
+
+//        Log.d(TAG, "setMinor: "+sb.toString());
+        this.minor = sb.toString();
     }
 }
+

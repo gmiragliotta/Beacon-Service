@@ -112,7 +112,9 @@ public class BeaconReceiver {
         List<ScanFilter> filters = new ArrayList<>();
 
         CustomFilter customFilter = new CustomFilter();
-        customFilter.addFilter(new Filter(Filter.UUID_TYPE, "01", 15, 15));
+        customFilter.addFilter(new Filter(Filter.UUID_TYPE, "0101", 14, 15));
+        customFilter.addFilter(new Filter(Filter.MAJOR_TYPE, "01", 0, 0));
+        customFilter.addFilter(new Filter(Filter.MINOR_TYPE, "01", 1, 1));
         customFilter.build();
 
         filters.add(ScanFilterUtils.getScanFilter(customFilter));

@@ -40,6 +40,7 @@ public class ScanFilterUtils {
         byte[] manufacturerDataMask = customFilter.getManufacturerDataMask();
         BeaconLightModel beaconLightModel = customFilter.getBeaconLightModel();
 
+
         // copy UUID (with no dashes) into data array
         UUID uuid = UUID.fromString(beaconLightModel.getUuid());
         int major = Integer.parseInt(beaconLightModel.getMajor());
