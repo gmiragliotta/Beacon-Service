@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.CustomFilter;
@@ -24,19 +25,19 @@ import java.util.Set;
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
     private static final int SIGNAL_THRESHOLD = -70;
-    private static final int SCAN_DURATION = 2000; // 2 seconds
-    public static final String RECEIVED_BEACON_INTENT = "ReceivedBeaconIntent";
+    private static final int SCAN_DURATION = 3 * 1000; // 3 seconds
 
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothAdapter mBluetoothAdapter;
-    private ScanCallback callback;
+    private ScanCallback callback = getScanCallback();
     private ScanSettings settings;
     private List<ScanFilter> filters;
 
     private static Set<BeaconModel> founded = new HashSet<>();
+    private boolean wasDetected = false;
 
 
     public BeaconReceiver(Context context) {
@@ -52,23 +53,32 @@ public class BeaconReceiver {
 
 
     public void startScanning(CustomFilter customFilter) {
-        callback = getScanCallback();
         settings = getScanSettings(ScanSettings.SCAN_MODE_LOW_LATENCY);
         filters = getScanFilters(customFilter);
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
     }
 
-    private static ScanSettings getScanSettings(int mode)
-    {
+    private static ScanSettings getScanSettings(int mode) {
         final ScanSettings.Builder builder = new ScanSettings.Builder();
         builder.setReportDelay(0);
         builder.setScanMode(mode);
         return builder.build();
     }
 
-    private ScanCallback getScanCallback(){
+    private ScanCallback getScanCallback() {
         final Handler scanHandler = new Handler();
+
+        // if no beacon detected in 3 seconds, stopscan
+
+            final Handler mCanceller = new Handler();
+            mCanceller.postDelayed(() -> {
+                if (!wasDetected) {
+                    Log.d(TAG, "No beacon detected after " + SCAN_DURATION/1000 + " seconds: stopScanning");
+                    mBluetoothLeScanner.stopScan(callback);
+                }
+            }, SCAN_DURATION);
+
         return new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, final ScanResult result) {
@@ -85,7 +95,7 @@ public class BeaconReceiver {
                                     byte[] data = result.getScanRecord().getBytes();
                                     BeaconModel beaconDetected = null;
 
-                                    if(BeaconModel.isBeacon(data)){
+                                    if (BeaconModel.isBeacon(data)) {
                                         beaconDetected = new BeaconModel(
                                                 BeaconModel.findUUID(data),
                                                 BeaconModel.findMajor(data),
@@ -100,6 +110,9 @@ public class BeaconReceiver {
                                         beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
                                         beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, beaconDetected);
                                         getContext().sendBroadcast(beaconReceivedIntent);
+                                        wasDetected = true;
+                                        mBluetoothLeScanner.stopScan(callback);
+                                        Log.d(TAG, "Beacon detected: stopScanning");
 //                                        founded.add(beaconDetected);
 
                                     }
@@ -118,7 +131,7 @@ public class BeaconReceiver {
         };
     }
 
-    private static List<ScanFilter> getScanFilters(CustomFilter customFilter){
+    private static List<ScanFilter> getScanFilters(CustomFilter customFilter) {
         List<ScanFilter> filters = new ArrayList<>();
 
         filters.add(ScanFilterUtils.getScanFilter(customFilter));
