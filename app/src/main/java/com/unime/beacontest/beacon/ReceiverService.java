@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
+import com.unime.beacontest.beacon.utils.CustomFilter;
+
 public class ReceiverService extends Service {
     public static final String TAG = "ReceiverService";
 
@@ -27,10 +29,12 @@ public class ReceiverService extends Service {
         return mBinder;
     }
 
-    public void scanning () {
+    public void scanning (CustomFilter customFilter) {
         BeaconReceiver mBeaconReceiver = new BeaconReceiver(this);
-        mBeaconReceiver.startScanning("");
+        mBeaconReceiver.startScanning(customFilter);
     }
+
+
 
 
 }

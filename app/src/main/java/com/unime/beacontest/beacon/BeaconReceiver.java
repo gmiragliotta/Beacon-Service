@@ -9,12 +9,12 @@ import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import java.util.ArrayList;
@@ -25,6 +25,9 @@ import java.util.Set;
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
     private static final int SIGNAL_THRESHOLD = -70;
+    private static final int SCAN_DURATION = 2000; // 2 seconds
+    public static final String RECEIVED_BEACON_INTENT = "ReceivedBeaconIntent";
+    public static final String ACTION_BEACON_RECEIVED = "ActionBeaconReceived";
 
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -34,6 +37,7 @@ public class BeaconReceiver {
     private List<ScanFilter> filters;
 
     private static Set<BeaconModel> founded = new HashSet<>();
+
 
     public BeaconReceiver(Context context) {
         this.context = context;
@@ -47,10 +51,10 @@ public class BeaconReceiver {
     }
 
 
-    public void startScanning(String s) {
+    public void startScanning(CustomFilter customFilter) {
         callback = getScanCallback();
         settings = getScanSettings(ScanSettings.SCAN_MODE_LOW_LATENCY);
-        filters = getScanFilters();
+        filters = getScanFilters(customFilter);
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
     }
@@ -63,7 +67,7 @@ public class BeaconReceiver {
         return builder.build();
     }
 
-    private static ScanCallback getScanCallback(){
+    private ScanCallback getScanCallback(){
         final Handler scanHandler = new Handler();
         return new ScanCallback() {
             @Override
@@ -91,7 +95,10 @@ public class BeaconReceiver {
                                                 result.getTimestampNanos(),
                                                 device.getAddress()
                                         );
+                                        Intent beaconReceivedIntent = new Intent();
+
                                         founded.add(beaconDetected);
+
                                     }
                                     try {
                                         Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
@@ -108,14 +115,8 @@ public class BeaconReceiver {
         };
     }
 
-    private static List<ScanFilter> getScanFilters(){
+    private static List<ScanFilter> getScanFilters(CustomFilter customFilter){
         List<ScanFilter> filters = new ArrayList<>();
-
-        CustomFilter customFilter = new CustomFilter();
-        customFilter.addFilter(new Filter(Filter.UUID_TYPE, "0101", 14, 15));
-        customFilter.addFilter(new Filter(Filter.MAJOR_TYPE, "01", 0, 0));
-        customFilter.addFilter(new Filter(Filter.MINOR_TYPE, "01", 1, 1));
-        customFilter.build();
 
         filters.add(ScanFilterUtils.getScanFilter(customFilter));
 

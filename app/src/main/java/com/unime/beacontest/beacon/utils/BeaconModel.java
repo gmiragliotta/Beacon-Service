@@ -1,12 +1,11 @@
 package com.unime.beacontest.beacon.utils;
 
-import android.util.Log;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Objects;
 
 
-public class BeaconModel {
+public class BeaconModel implements Serializable {
 
     // UUID of beacon
     private String uuid;
@@ -51,10 +50,6 @@ public class BeaconModel {
     public String getUuid(){
         return this.uuid;
     }
-
-    /*protected String getArguments(){
-        return this.arguments;
-    }*/
 
     public String getMajor(){
         return this.major;
@@ -108,10 +103,10 @@ public class BeaconModel {
     }
 
     public static String findUUID(final byte[] data){
-        Log.e("Guarda qui", "findUUID: " + data.length );
+//        Log.e("Guarda qui", "findUUID: " + data.length );
         StringBuilder sb = new StringBuilder();
         for(int i = UUID_START_INDEX, offset = 0; i <= UUID_STOP_INDEX; ++i, ++offset) {
-            Log.e("Guarda qui", "findUUID INDEX: " + i );
+//            Log.e("Guarda qui", "findUUID INDEX: " + i );
             sb.append(String.format("%02x", (int)(data[i] & 0xff)));
             if (offset == 3 || offset == 5 || offset == 7 || offset == 9) {
                 sb.append("-");
