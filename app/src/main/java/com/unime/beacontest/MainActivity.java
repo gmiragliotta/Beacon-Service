@@ -15,6 +15,7 @@ import android.view.View;
 import com.unime.beacontest.beacon.BeaconReceiver;
 import com.unime.beacontest.beacon.ReceiverService;
 import com.unime.beacontest.beacon.ReceiverService.LocalBinder;
+import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.Filter;
 
@@ -96,7 +97,14 @@ public class MainActivity extends AppCompatActivity {
     private class ReceivedBeaconBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            
+            BeaconModel beaconReceived = (BeaconModel) intent.getSerializableExtra(BeaconReceiver.RECEIVED_BEACON_EXTRA);
+            try {
+                Log.d(TAG, "uuid: " + beaconReceived.getUuid() +
+                        " major: " + beaconReceived.getMajor() +
+                        " minor: " + beaconReceived.getMinor() + "\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

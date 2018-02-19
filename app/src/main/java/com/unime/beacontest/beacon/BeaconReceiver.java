@@ -28,6 +28,7 @@ public class BeaconReceiver {
     private static final int SCAN_DURATION = 2000; // 2 seconds
     public static final String RECEIVED_BEACON_INTENT = "ReceivedBeaconIntent";
     public static final String ACTION_BEACON_RECEIVED = "ActionBeaconReceived";
+    public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -96,7 +97,8 @@ public class BeaconReceiver {
                                                 device.getAddress()
                                         );
                                         Intent beaconReceivedIntent = new Intent();
-
+                                        beaconReceivedIntent.setAction(ACTION_BEACON_RECEIVED);
+                                        beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, beaconDetected);
                                         founded.add(beaconDetected);
 
                                     }
