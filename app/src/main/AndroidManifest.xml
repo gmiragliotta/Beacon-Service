@@ -26,6 +26,12 @@
         <service android:name=".beacon.ReceiverService"
             android:exported="false" />
 
+        <receiver android:name=".beacon.BeaconBroadcastReceiver">
+            <intent-filter>
+                <action android:name="ACTION_BEACON_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

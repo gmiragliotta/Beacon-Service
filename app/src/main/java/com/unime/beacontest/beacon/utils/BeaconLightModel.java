@@ -1,5 +1,7 @@
 package com.unime.beacontest.beacon.utils;
 
+import android.util.Log;
+
 public class BeaconLightModel {
     // UUID of beacon
     private String uuid;
@@ -27,7 +29,7 @@ public class BeaconLightModel {
                 sb.append("-");
             }
         }
-//        Log.d("BeaconLightModel", "setUuid: " + sb.toString());
+        Log.d("BeaconLightModel", "setUuid: " + sb.toString());
         this.uuid = sb.toString();
     }
 
@@ -41,7 +43,7 @@ public class BeaconLightModel {
         for(int i=0; i<major.length; i++)
             sb.append(major[i]);
 
-//        Log.d(TAG, "setMajor: " + sb.toString());
+        Log.d(TAG, "setMajor: " + sb.toString());
         this.major = sb.toString();
     }
 
@@ -55,7 +57,7 @@ public class BeaconLightModel {
         for(int i=0; i<minor.length; i++)
             sb.append(minor[i]);
 
-//        Log.d(TAG, "setMinor: "+sb.toString());
+        Log.d(TAG, "setMinor: "+sb.toString());
         this.minor = sb.toString();
     }
 }

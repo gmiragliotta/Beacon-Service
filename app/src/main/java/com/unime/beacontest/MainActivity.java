@@ -1,10 +1,8 @@
 package com.unime.beacontest;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -12,10 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.unime.beacontest.beacon.BeaconReceiver;
 import com.unime.beacontest.beacon.ReceiverService;
 import com.unime.beacontest.beacon.ReceiverService.LocalBinder;
-import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.Filter;
 
@@ -25,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     ReceiverService mService;
     boolean mBound = false;
 
-    IntentFilter mReceivedBeaconIntentFilter;
 
 
     @Override
@@ -35,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
 //        AltBeaconManager altBeaconManager = new AltBeaconManager(this);
 //        altBeaconManager.startAltBeaconService(AltBeaconUtils.ACTION_ALT_BEACON_SCANNING);
-        mReceivedBeaconIntentFilter = new IntentFilter();
-        mReceivedBeaconIntentFilter.addAction(BeaconReceiver.ACTION_BEACON_RECEIVED);
     }
 
     @Override
@@ -93,18 +86,4 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    // TODO BroadcastReceiver
-    private class ReceivedBeaconBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            BeaconModel beaconReceived = (BeaconModel) intent.getSerializableExtra(BeaconReceiver.RECEIVED_BEACON_EXTRA);
-            try {
-                Log.d(TAG, "uuid: " + beaconReceived.getUuid() +
-                        " major: " + beaconReceived.getMajor() +
-                        " minor: " + beaconReceived.getMinor() + "\n");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

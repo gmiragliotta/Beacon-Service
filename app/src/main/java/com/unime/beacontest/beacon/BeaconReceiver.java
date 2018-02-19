@@ -11,7 +11,6 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.CustomFilter;
@@ -27,7 +26,7 @@ public class BeaconReceiver {
     private static final int SIGNAL_THRESHOLD = -70;
     private static final int SCAN_DURATION = 2000; // 2 seconds
     public static final String RECEIVED_BEACON_INTENT = "ReceivedBeaconIntent";
-    public static final String ACTION_BEACON_RECEIVED = "ActionBeaconReceived";
+
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
     private Context context;
@@ -82,7 +81,7 @@ public class BeaconReceiver {
                                 public void run() {
                                     BluetoothDevice device = result.getDevice();
 
-                                    Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
+                                    //Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
                                     byte[] data = result.getScanRecord().getBytes();
                                     BeaconModel beaconDetected = null;
 
@@ -96,20 +95,22 @@ public class BeaconReceiver {
                                                 result.getTimestampNanos(),
                                                 device.getAddress()
                                         );
-                                        Intent beaconReceivedIntent = new Intent();
-                                        beaconReceivedIntent.setAction(ACTION_BEACON_RECEIVED);
+                                        Intent beaconReceivedIntent =
+                                                new Intent(getContext(), BeaconBroadcastReceiver.class);
+                                        beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
                                         beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, beaconDetected);
-                                        founded.add(beaconDetected);
+                                        getContext().sendBroadcast(beaconReceivedIntent);
+//                                        founded.add(beaconDetected);
 
                                     }
-                                    try {
-                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-                                                " major: " + beaconDetected.getMajor() +
-                                                " minor: " + beaconDetected.getMinor() + "\n");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                    Log.d(TAG, "set: " + founded);
+//                                    try {
+//                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+//                                                " major: " + beaconDetected.getMajor() +
+//                                                " minor: " + beaconDetected.getMinor() + "\n");
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                    Log.d(TAG, "set: " + founded);
                                 }
                             });
                 }

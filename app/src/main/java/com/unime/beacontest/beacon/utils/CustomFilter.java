@@ -1,7 +1,5 @@
 package com.unime.beacontest.beacon.utils;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -140,7 +138,7 @@ public class CustomFilter {
         char[] dataCharArray = data.toCharArray();
         int range = (endDataPosition - startDataPosition) + 1;
 
-        // TODO MODIFY THIS, byte and hex array size mismatch
+        // Complete MODIFY THIS, byte and hex array size mismatch
         for (int i = 0; i <= range; i++) {
             manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + startDataPosition] = 1;
         }
@@ -153,8 +151,6 @@ public class CustomFilter {
         for(int i=0; i < UUID_SIZE_HEX; i++){
             sb.append(uuid[i]);
         }
-
-        Log.d("CustomFilter", "buildUuidToFilter: " + sb.toString());
     }
 
     private void buildMajorToFilter(String data, int startDataPosition, int endDataPosition) {
@@ -169,7 +165,6 @@ public class CustomFilter {
         for (int hexi = 0; hexi < range * 2; hexi++) {
             major[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
         }
-        Log.d("CustomFilter", "buildMajorToFilter: " + major.toString());
     }
 
     private void buildMinorToFilter(String data, int startDataPosition, int endDataPosition) {
@@ -185,7 +180,6 @@ public class CustomFilter {
             minor[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
         }
 
-        Log.d("CustomFilter", "buildMinorToFilter: " + minor.toString());
     }
 
 }
