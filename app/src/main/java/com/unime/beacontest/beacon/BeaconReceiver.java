@@ -43,7 +43,12 @@ public class BeaconReceiver {
     public BeaconReceiver(Context context) {
         this.context = context;
 
-        mBluetoothAdapter = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        try {
+            mBluetoothAdapter = ((BluetoothManager)
+                    context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -91,7 +96,6 @@ public class BeaconReceiver {
                                 public void run() {
                                     BluetoothDevice device = result.getDevice();
 
-                                    //Log.d(TAG, "Device Name: " + result.getDevice().getName() + " rssi: " + result.getRssi() + "\n");
                                     byte[] data = result.getScanRecord().getBytes();
                                     BeaconModel beaconDetected = null;
 
@@ -113,8 +117,6 @@ public class BeaconReceiver {
                                         wasDetected = true;
                                         mBluetoothLeScanner.stopScan(callback);
                                         Log.d(TAG, "Beacon detected: stopScanning");
-//                                        founded.add(beaconDetected);
-
                                     }
 //                                    try {
 //                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +

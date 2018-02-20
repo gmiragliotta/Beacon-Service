@@ -8,17 +8,10 @@ import static com.unime.beacontest.beacon.utils.ScanFilterUtils.MANUFACTURER_DAT
 
 public class CustomFilter {
     // TODO check for singleton design pattern
-    private static List<Filter> filters;
-    private static BeaconLightModel beaconLightModel;
-    private static byte[] manufacturerDataMask;
+
+
 
     public static final String TAG = "CustomFilter";
-
-    public CustomFilter() {
-        filters = new ArrayList<>();
-        beaconLightModel = new BeaconLightModel();
-        manufacturerDataMask = new byte[MANUFACTURER_DATAMASK_SIZE];
-    }
 
     public List<Filter> getFilters() {
         return filters;
@@ -36,7 +29,7 @@ public class CustomFilter {
     private static final int UUID_SIZE_HEX = 32;
     private static final int UUID_SIZE = 16;
     private static final int MAJOR_SIZE = 2;
-    private static final int MINOR_SIZE = 2;
+//    private static final int MINOR_SIZE = 2;
     private static final int MAJOR_SIZE_HEX = 4;
     private static final int MINOR_SIZE_HEX = 4;
     private static final int UUID_SELECT = 0;
@@ -44,70 +37,79 @@ public class CustomFilter {
     private static final int MINOR_SELECT = 2;
     private static final int MANUFACTURER_DATAMASK_SELECT = 3;
 
-    private char[] uuid = new char[UUID_SIZE_HEX];
-    private char[] major = new char[MAJOR_SIZE_HEX];
-    private char[] minor = new char[MINOR_SIZE_HEX];
+    private static char[] uuid = new char[UUID_SIZE_HEX];
+    private static char[] major = new char[MAJOR_SIZE_HEX];
+    private static char[] minor = new char[MINOR_SIZE_HEX];
 
+    private static List<Filter> filters;
+    private static BeaconLightModel beaconLightModel;
+    private static byte[] manufacturerDataMask;
 
-    public void addFilter(Filter filter) {
-        filters.add(filter);
+    private static CustomFilter instance = new CustomFilter();
+
+    private CustomFilter() {
+        filters = new ArrayList<>();
+        beaconLightModel = new BeaconLightModel();
+        manufacturerDataMask = new byte[MANUFACTURER_DATAMASK_SIZE];
     }
 
-    public void build() {
-        if (filters.size() == 0)
-            return;
+    public static class Builder {
+        public Builder() {
 
-        zeros(UUID_SELECT);
-        zeros(MAJOR_SELECT);
-        zeros(MINOR_SELECT);
-        zeros(MANUFACTURER_DATAMASK_SELECT);
-
-        // TODO add a control statement to not reuse startDataPosition end endDataPosition
-        // in the same build() method call.
-        for (Filter filter : filters) {
-            switch (filter.getType()) {
-                case Filter.UUID_TYPE:
-                    buildUuidToFilter(
-                            filter.getData(),
-                            filter.getStartDataPosition(),
-                            filter.getEndDataPosition());
-                    break;
-                case Filter.MAJOR_TYPE:
-                    buildMajorToFilter(
-                            filter.getData(),
-                            filter.getStartDataPosition(),
-                            filter.getEndDataPosition());
-                    break;
-                case Filter.MINOR_TYPE:
-                    buildMinorToFilter(
-                            filter.getData(),
-                            filter.getStartDataPosition(),
-                            filter.getEndDataPosition());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Invalid type passed!");
-            }
         }
-//        String prova = "";
-//        for(int i=0; i<UUID_SIZE_HEX; i++) {
-//            prova += uuid[i];
-//        }
-//        Log.d(TAG, "build: " + prova);
 
-//        for(int i=0; i<MANUFACTURER_DATAMASK_SIZE; i++) {
-//            prova += manufacturerDataMask[i];
-//            if(i==1 || i==17 || i== 19 || i == 21)
-//                prova += "-";
-//        }
-//        Log.d(TAG, "build: " + prova);
+        public void addFilter(Filter filter) {
+            filters.add(filter);
+        }
 
-        // now we have uuid, major and minor char array filled with our data.
-        beaconLightModel.setUuid(uuid);
-        beaconLightModel.setMajor(major);
-        beaconLightModel.setMinor(minor);
+        public CustomFilter build() {
+            zeros(UUID_SELECT);
+            zeros(MAJOR_SELECT);
+            zeros(MINOR_SELECT);
+            zeros(MANUFACTURER_DATAMASK_SELECT);
+
+            // if not filters has been added, return a CustomFilter initialized to zero.
+            if (filters.size() == 0) {
+                return instance;
+            }
+
+            // TODO add a control statement to not reuse startDataPosition end endDataPosition
+            // in the same build() method call.
+            for (Filter filter : filters) {
+                switch (filter.getType()) {
+                    case Filter.UUID_TYPE:
+                        buildUuidToFilter(
+                                filter.getData(),
+                                filter.getStartDataPosition(),
+                                filter.getEndDataPosition());
+                        break;
+                    case Filter.MAJOR_TYPE:
+                        buildMajorToFilter(
+                                filter.getData(),
+                                filter.getStartDataPosition(),
+                                filter.getEndDataPosition());
+                        break;
+                    case Filter.MINOR_TYPE:
+                        buildMinorToFilter(
+                                filter.getData(),
+                                filter.getStartDataPosition(),
+                                filter.getEndDataPosition());
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("Invalid type passed!");
+                }
+            }
+
+            // now we have uuid, major and minor char array filled with our data.
+            beaconLightModel.setUuid(uuid);
+            beaconLightModel.setMajor(major);
+            beaconLightModel.setMinor(minor);
+
+            return instance;
+        }
     }
 
-    private void zeros(int select) {
+    private static void zeros(int select) {
         switch (select) {
             case UUID_SELECT:
                 for (int i = 0; i < UUID_SIZE_HEX; i++) {
@@ -134,7 +136,7 @@ public class CustomFilter {
         }
     }
 
-    private void buildUuidToFilter(String data, int startDataPosition, int endDataPosition) {
+    private static void buildUuidToFilter(String data, int startDataPosition, int endDataPosition) {
         char[] dataCharArray = data.toCharArray();
         int range = (endDataPosition - startDataPosition) + 1;
 
@@ -153,7 +155,7 @@ public class CustomFilter {
         }
     }
 
-    private void buildMajorToFilter(String data, int startDataPosition, int endDataPosition) {
+    private static void buildMajorToFilter(String data, int startDataPosition, int endDataPosition) {
         char[] dataCharArray = data.toCharArray();
         int range = (endDataPosition - startDataPosition) + 1;
         int offset = startDataPosition + UUID_SIZE;
@@ -167,7 +169,7 @@ public class CustomFilter {
         }
     }
 
-    private void buildMinorToFilter(String data, int startDataPosition, int endDataPosition) {
+    private static void buildMinorToFilter(String data, int startDataPosition, int endDataPosition) {
         char[] dataCharArray = data.toCharArray();
         int range = (endDataPosition - startDataPosition) + 1;
         int offset = startDataPosition + UUID_SIZE + MAJOR_SIZE;
