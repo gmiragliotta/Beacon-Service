@@ -34,6 +34,8 @@ public class ReceiverService extends Service {
         mBeaconReceiver.startScanning(customFilter);
     }
 
+    // TODO add sending functionality
+
 
 
 
