@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".beacon.ReceiverService"
+        <service android:name=".beacon.BeaconService"
             android:exported="false" />
 
         <receiver android:name=".beacon.BeaconBroadcastReceiver">

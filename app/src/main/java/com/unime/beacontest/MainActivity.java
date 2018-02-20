@@ -10,15 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.unime.beacontest.beacon.ReceiverService;
-import com.unime.beacontest.beacon.ReceiverService.LocalBinder;
+import com.unime.beacontest.beacon.BeaconService;
+import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.Filter;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
-    ReceiverService mService;
+    BeaconService mService;
     boolean mBound = false;
 
 
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Intent intent = new Intent(this, ReceiverService.class);
+        Intent intent = new Intent(this, BeaconService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 

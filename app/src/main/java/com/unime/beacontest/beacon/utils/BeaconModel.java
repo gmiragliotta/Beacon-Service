@@ -79,6 +79,20 @@ public class BeaconModel implements Serializable {
         this.arguments = arguments;
     }*/
 
+    public void setUuid(String uuid) {
+
+        this.uuid = (uuid.substring(0,8) + "-" + uuid.substring(8, 12) + "-" +
+                uuid.substring(12, 16) + "-" + uuid.substring(16, 32));
+    }
+
+    public void setTxPower(int txPower) {
+        this.txPower = txPower;
+    }
+
+    public void setRssi(int rssi) {
+        this.rssi = rssi;
+    }
+
     public void setMajor(String major){
         this.major = major;
     }
