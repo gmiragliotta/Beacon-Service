@@ -13,7 +13,6 @@ import android.view.View;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.beacon.utils.Filter;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -58,9 +57,10 @@ public class MainActivity extends AppCompatActivity {
             // occur in a separate thread to avoid slowing down the activity performance.
 
             CustomFilter.Builder builder = new CustomFilter.Builder();
-            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
-            builder.addFilter(new Filter(Filter.MAJOR_TYPE, "01", 1, 1));
-            builder.addFilter(new Filter(Filter.MINOR_TYPE, "00", 1, 1));
+//            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
+//            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
+//            builder.addFilter(new Filter(Filter.MAJOR_TYPE, "01", 1, 1));
+//            builder.addFilter(new Filter(Filter.MINOR_TYPE, "01", 1, 1));
             CustomFilter customFilter = builder.build();
             mService.scanning(customFilter);
 //            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
@@ -86,5 +86,4 @@ public class MainActivity extends AppCompatActivity {
             mBound = false;
         }
     };
-
 }

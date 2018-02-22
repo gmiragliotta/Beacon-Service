@@ -57,8 +57,7 @@ public class BeaconService extends Service {
     }
 
     // TODO add sending functionality
-
-    public void starting (BeaconModel beaconModel) {
+    public void sending (BeaconModel beaconModel) {
         if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             getApplicationContext().startActivity(enableBtIntent);

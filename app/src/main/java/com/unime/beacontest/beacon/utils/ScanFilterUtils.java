@@ -32,24 +32,20 @@ public class ScanFilterUtils {
                         0,0,
 
                         0
-
-
                 };
 
         // the mask tells what bytes in the filter need to match, 1 if it has to match, 0 if not
         byte[] manufacturerDataMask = customFilter.getManufacturerDataMask();
         BeaconLightModel beaconLightModel = customFilter.getBeaconLightModel();
 
-
-        // copy UUID (with no dashes) into data array
         UUID uuid = UUID.fromString(beaconLightModel.getUuid());
         int major = Integer.parseInt(beaconLightModel.getMajor());
         int minor = Integer.parseInt(beaconLightModel.getMinor());
 
-        // copy major into data array
+        // copy uuid into data array
         System.arraycopy(ConversionUtils.UuidToByteArray(uuid), 0, manufacturerData, 2, 16);
 
-        // copy minor into data array
+        // copy major into data array
         System.arraycopy(ConversionUtils.integerToByteArray(major), 0, manufacturerData, 18, 2);
 
         // copy minor into data array

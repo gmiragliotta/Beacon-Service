@@ -1,5 +1,7 @@
 package com.unime.beacontest.beacon.utils;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,10 +9,6 @@ import static com.unime.beacontest.beacon.utils.ScanFilterUtils.MANUFACTURER_DAT
 import static com.unime.beacontest.beacon.utils.ScanFilterUtils.MANUFACTURER_DATAMASK_SIZE;
 
 public class CustomFilter {
-    // TODO check for singleton design pattern
-
-
-
     public static final String TAG = "CustomFilter";
 
     public List<Filter> getFilters() {
@@ -37,25 +35,29 @@ public class CustomFilter {
     private static final int MINOR_SELECT = 2;
     private static final int MANUFACTURER_DATAMASK_SELECT = 3;
 
-    private static char[] uuid = new char[UUID_SIZE_HEX];
-    private static char[] major = new char[MAJOR_SIZE_HEX];
-    private static char[] minor = new char[MINOR_SIZE_HEX];
+    private List<Filter> filters;
+    private  BeaconLightModel beaconLightModel;
+    private  byte[] manufacturerDataMask;
 
-    private static List<Filter> filters;
-    private static BeaconLightModel beaconLightModel;
-    private static byte[] manufacturerDataMask;
-
-    private static CustomFilter instance = new CustomFilter();
-
-    private CustomFilter() {
-        filters = new ArrayList<>();
-        beaconLightModel = new BeaconLightModel();
-        manufacturerDataMask = new byte[MANUFACTURER_DATAMASK_SIZE];
+    private CustomFilter(List<Filter> filters, BeaconLightModel beaconLightModel, byte[] manufacturerDataMask) {
+        this.filters = filters;
+        this.beaconLightModel = beaconLightModel;
+        this.manufacturerDataMask = manufacturerDataMask;
     }
 
     public static class Builder {
-        public Builder() {
+        private char[] uuid = new char[UUID_SIZE_HEX];
+        private char[] major = new char[MAJOR_SIZE_HEX];
+        private char[] minor = new char[MINOR_SIZE_HEX];
 
+        private List<Filter> filters;
+        private  BeaconLightModel beaconLightModel;
+        private  byte[] manufacturerDataMask;
+
+        public Builder() {
+            filters = new ArrayList<>();
+            beaconLightModel = new BeaconLightModel();
+            manufacturerDataMask = new byte[MANUFACTURER_DATAMASK_SIZE];
         }
 
         public void addFilter(Filter filter) {
@@ -67,10 +69,9 @@ public class CustomFilter {
             zeros(MAJOR_SELECT);
             zeros(MINOR_SELECT);
             zeros(MANUFACTURER_DATAMASK_SELECT);
-
-            // if not filters has been added, return a CustomFilter initialized to zero.
-            if (filters.size() == 0) {
-                return instance;
+            
+            if(filters.size() == 0) {
+                Log.d(TAG, "build: No filters added. Detecting all beacons.");
             }
 
             // TODO add a control statement to not reuse startDataPosition end endDataPosition
@@ -105,81 +106,81 @@ public class CustomFilter {
             beaconLightModel.setMajor(major);
             beaconLightModel.setMinor(minor);
 
-            return instance;
+            return new CustomFilter(filters, beaconLightModel, manufacturerDataMask);
         }
-    }
-
-    private static void zeros(int select) {
-        switch (select) {
-            case UUID_SELECT:
-                for (int i = 0; i < UUID_SIZE_HEX; i++) {
-                    uuid[i] = '0';
-                }
-                break;
-            case MAJOR_SELECT:
-                for (int i = 0; i < MAJOR_SIZE_HEX; i++) {
-                    major[i] = '0';
-                }
-                break;
-            case MINOR_SELECT:
-                for (int i = 0; i < MINOR_SIZE_HEX; i++) {
-                    minor[i] = '0';
-                }
-                break;
-            case MANUFACTURER_DATAMASK_SELECT:
-                for (int i = 0; i < MANUFACTURER_DATAMASK_SIZE; i++) {
-                    manufacturerDataMask[i] = 0;
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException("Invalid select passed!");
-        }
-    }
-
-    private static void buildUuidToFilter(String data, int startDataPosition, int endDataPosition) {
-        char[] dataCharArray = data.toCharArray();
-        int range = (endDataPosition - startDataPosition) + 1;
-
-        // Complete MODIFY THIS, byte and hex array size mismatch
-        for (int i = 0; i <= range; i++) {
-            manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + startDataPosition] = 1;
+        private void zeros(int select) {
+            switch (select) {
+                case UUID_SELECT:
+                    for (int i = 0; i < UUID_SIZE_HEX; i++) {
+                        uuid[i] = '0';
+                    }
+                    break;
+                case MAJOR_SELECT:
+                    for (int i = 0; i < MAJOR_SIZE_HEX; i++) {
+                        major[i] = '0';
+                    }
+                    break;
+                case MINOR_SELECT:
+                    for (int i = 0; i < MINOR_SIZE_HEX; i++) {
+                        minor[i] = '0';
+                    }
+                    break;
+                case MANUFACTURER_DATAMASK_SELECT:
+                    for (int i = 0; i < MANUFACTURER_DATAMASK_SIZE; i++) {
+                        manufacturerDataMask[i] = 0;
+                    }
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Invalid select passed!");
+            }
         }
 
-        for (int hexi = 0; hexi < range * 2; hexi++) {
-            uuid[hexi + (startDataPosition*2)] = dataCharArray[hexi];
+        private void buildUuidToFilter(String data, int startDataPosition, int endDataPosition) {
+            char[] dataCharArray = data.toCharArray();
+            int range = (endDataPosition - startDataPosition) + 1;
+
+            // Complete MODIFY THIS, byte and hex array size mismatch
+            for (int i = 0; i <= range; i++) {
+                manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + startDataPosition] = 1;
+            }
+
+            for (int hexi = 0; hexi < range * 2; hexi++) {
+                uuid[hexi + (startDataPosition*2)] = dataCharArray[hexi];
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i < UUID_SIZE_HEX; i++){
+                sb.append(uuid[i]);
+            }
         }
 
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i < UUID_SIZE_HEX; i++){
-            sb.append(uuid[i]);
-        }
-    }
-
-    private static void buildMajorToFilter(String data, int startDataPosition, int endDataPosition) {
-        char[] dataCharArray = data.toCharArray();
-        int range = (endDataPosition - startDataPosition) + 1;
-        int offset = startDataPosition + UUID_SIZE;
+        private void buildMajorToFilter(String data, int startDataPosition, int endDataPosition) {
+            char[] dataCharArray = data.toCharArray();
+            int range = (endDataPosition - startDataPosition) + 1;
+            int offset = startDataPosition + UUID_SIZE;
 
 
-        for (int i = 0; i < range; i++) {
-            manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + offset] = 1;
-        }
-        for (int hexi = 0; hexi < range * 2; hexi++) {
-            major[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
-        }
-    }
-
-    private static void buildMinorToFilter(String data, int startDataPosition, int endDataPosition) {
-        char[] dataCharArray = data.toCharArray();
-        int range = (endDataPosition - startDataPosition) + 1;
-        int offset = startDataPosition + UUID_SIZE + MAJOR_SIZE;
-
-        for (int i = 0; i < range; i++) {
-            manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + offset] = 1;
+            for (int i = 0; i < range; i++) {
+                manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + offset] = 1;
+            }
+            for (int hexi = 0; hexi < range * 2; hexi++) {
+                major[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
+            }
         }
 
-        for (int hexi = 0; hexi < range * 2; hexi++) {
-            minor[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
+        private void buildMinorToFilter(String data, int startDataPosition, int endDataPosition) {
+            char[] dataCharArray = data.toCharArray();
+            int range = (endDataPosition - startDataPosition) + 1;
+            int offset = startDataPosition + UUID_SIZE + MAJOR_SIZE;
+
+            for (int i = 0; i < range; i++) {
+                manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + offset] = 1;
+            }
+
+            for (int hexi = 0; hexi < range * 2; hexi++) {
+                minor[hexi + (startDataPosition * 2)] = dataCharArray[hexi];
+            }
+
         }
 
     }
