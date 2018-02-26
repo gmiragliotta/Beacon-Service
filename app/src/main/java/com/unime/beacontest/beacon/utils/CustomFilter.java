@@ -106,6 +106,11 @@ public class CustomFilter {
             beaconLightModel.setMajor(major);
             beaconLightModel.setMinor(minor);
 
+            // filter ok
+            for (int i = 0; i < MANUFACTURER_DATAMASK_SIZE; i++) {
+                Log.d(TAG, ""+ manufacturerDataMask[i]);
+            }
+
             return new CustomFilter(filters, beaconLightModel, manufacturerDataMask);
         }
         private void zeros(int select) {

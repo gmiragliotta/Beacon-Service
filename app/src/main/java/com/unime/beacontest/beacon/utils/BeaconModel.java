@@ -23,7 +23,8 @@ public class BeaconModel implements Serializable {
     private String address;
 
 
-    private static final int PROTOCOL_OFFSET = 3;
+    //private static final int PROTOCOL_OFFSET = 3;
+    private static final int PROTOCOL_OFFSET = 0;
     private static final int AD_LENGTH_INDEX = 0 + PROTOCOL_OFFSET;
     private static final int AD_TYPE_INDEX = 1 + PROTOCOL_OFFSET;
     private static final int BEACON_CODE_INDEX = 4 + PROTOCOL_OFFSET;

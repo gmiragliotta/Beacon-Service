@@ -83,4 +83,12 @@ public class ConversionUtils {
     {
         return (byteArray[0] & 0xff) * 0x100 + (byteArray[1] & 0xff);
     }
+
+    public static String byteToHex(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<data.length; i++) {
+            sb.append(String.format("%02x", data[i]));
+        }
+        return sb.toString();
+    }
 }

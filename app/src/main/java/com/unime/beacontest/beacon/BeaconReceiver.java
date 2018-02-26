@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.ConversionUtils;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
@@ -24,8 +25,8 @@ import java.util.Set;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
-    private static final int SIGNAL_THRESHOLD = -70;
-    private static final int SCAN_DURATION = 3 * 1000; // 3 seconds
+    private static final int SIGNAL_THRESHOLD = -100;
+    private static final int SCAN_DURATION = 10 * 1000; // 3 seconds
 
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
@@ -97,6 +98,7 @@ public class BeaconReceiver {
                                     BluetoothDevice device = result.getDevice();
 
                                     byte[] data = result.getScanRecord().getBytes();
+                                    Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
                                     BeaconModel beaconDetected = null;
 
                                     if (BeaconModel.isBeacon(data)) {
@@ -109,22 +111,23 @@ public class BeaconReceiver {
                                                 result.getTimestampNanos(),
                                                 device.getAddress()
                                         );
+
                                         Intent beaconReceivedIntent =
                                                 new Intent(getContext(), BeaconBroadcastReceiver.class);
                                         beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
                                         beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, beaconDetected);
                                         getContext().sendBroadcast(beaconReceivedIntent);
-                                        wasDetected = true;
-                                        mBluetoothLeScanner.stopScan(callback);
-                                        Log.d(TAG, "Beacon detected: stopScanning");
+                                        //wasDetected = true;
+                                        //mBluetoothLeScanner.stopScan(callback);
+//                                        Log.d(TAG, "Beacon detected: stopScanning");
+//                                        try {
+//                                            Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+//                                                    " major: " + beaconDetected.getMajor() +
+//                                                    " minor: " + beaconDetected.getMinor() + "\n");
+//                                        } catch (Exception e) {
+//                                            e.printStackTrace();
+//                                        }
                                     }
-//                                    try {
-//                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-//                                                " major: " + beaconDetected.getMajor() +
-//                                                " minor: " + beaconDetected.getMinor() + "\n");
-//                                    } catch (Exception e) {
-//                                        e.printStackTrace();
-//                                    }
 //                                    Log.d(TAG, "set: " + founded);
                                 }
                             });
@@ -139,5 +142,6 @@ public class BeaconReceiver {
         filters.add(ScanFilterUtils.getScanFilter(customFilter));
 
         return filters;
+        //return null;
     }
 }
