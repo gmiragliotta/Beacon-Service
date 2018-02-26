@@ -3,6 +3,7 @@ package com.unime.beacontest.beacon.utils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.unime.beacontest.beacon.utils.ScanFilterUtils.MANUFACTURER_DATAMASK_OFFSET;
@@ -106,12 +107,7 @@ public class CustomFilter {
             beaconLightModel.setMajor(major);
             beaconLightModel.setMinor(minor);
 
-            // filter ok
-            StringBuilder debugSb = new StringBuilder();
-            for (int i = 0; i < MANUFACTURER_DATAMASK_SIZE; i++) {
-                debugSb.append(manufacturerDataMask[i]);
-            }
-            Log.d(TAG, ""+ debugSb.toString());
+            Log.d(TAG, ""+ Arrays.toString(manufacturerDataMask));
 
             return new CustomFilter(filters, beaconLightModel, manufacturerDataMask);
         }
