@@ -58,8 +58,9 @@ public class MainActivity extends AppCompatActivity {
             // occur in a separate thread to avoid slowing down the activity performance.
 
             CustomFilter.Builder builder = new CustomFilter.Builder();
-//            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
-//            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
+            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
+            builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
+            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
             builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
             builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
             CustomFilter customFilter = builder.build();

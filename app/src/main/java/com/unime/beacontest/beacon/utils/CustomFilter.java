@@ -107,9 +107,11 @@ public class CustomFilter {
             beaconLightModel.setMinor(minor);
 
             // filter ok
+            StringBuilder debugSb = new StringBuilder();
             for (int i = 0; i < MANUFACTURER_DATAMASK_SIZE; i++) {
-                Log.d(TAG, ""+ manufacturerDataMask[i]);
+                debugSb.append(manufacturerDataMask[i]);
             }
+            Log.d(TAG, ""+ debugSb.toString());
 
             return new CustomFilter(filters, beaconLightModel, manufacturerDataMask);
         }
@@ -145,7 +147,7 @@ public class CustomFilter {
             int range = (endDataPosition - startDataPosition) + 1;
 
             // Complete MODIFY THIS, byte and hex array size mismatch
-            for (int i = 0; i <= range; i++) {
+            for (int i = 0; i < range; i++) {
                 manufacturerDataMask[i + MANUFACTURER_DATAMASK_OFFSET + startDataPosition] = 1;
             }
 
