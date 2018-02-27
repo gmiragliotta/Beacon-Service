@@ -9,6 +9,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -26,6 +27,7 @@ public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
     private static final int SIGNAL_THRESHOLD = -100;
     private static final int SCAN_DURATION = 3 * 1000;
+    private int numberOfBeaconDetected = 0; // TODO remove
 
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
@@ -58,24 +60,26 @@ public class BeaconReceiver {
 
 
     public void startScanning(CustomFilter customFilter) {
-        settings = getScanSettings(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        settings = getScanSettings();
         filters = getScanFilters(customFilter);
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
     }
 
-    private static ScanSettings getScanSettings(int mode) {
+    private static ScanSettings getScanSettings() {
         final ScanSettings.Builder builder = new ScanSettings.Builder();
         builder.setReportDelay(0);
-        builder.setScanMode(mode);
+        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            builder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
+        }
         return builder.build();
     }
 
     private ScanCallback getScanCallback() {
         final Handler scanHandler = new Handler();
 
-        // if no beacon detected in 3 seconds, stopscan
-
+        // stop scan in 3 seconds
             final Handler mCanceller = new Handler();
             mCanceller.postDelayed(() -> {
                 if (!wasDetected) {
@@ -104,7 +108,7 @@ public class BeaconReceiver {
                                         beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
                                         beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, result);
                                         getContext().sendBroadcast(beaconReceivedIntent);
-
+                                        //Log.d(TAG, "run: " + ++numberOfBeaconDetected);
                                         wasDetected = true;
                                     }
 //                                    Log.d(TAG, "set: " + founded);

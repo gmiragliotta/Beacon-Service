@@ -24,6 +24,7 @@ public class ScanFilterUtils {
         final byte[] manufacturerData = new byte[]
                 {
                         0,0,
+
                         // uuid
                         0,0,0,0,
                         0,0,

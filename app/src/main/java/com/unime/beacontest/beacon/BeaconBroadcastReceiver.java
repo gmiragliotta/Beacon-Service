@@ -16,6 +16,7 @@ public class BeaconBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        // TODO asynchronize
         ScanResult result = intent.getParcelableExtra(BeaconReceiver.RECEIVED_BEACON_EXTRA);
 
         BluetoothDevice device = result.getDevice();

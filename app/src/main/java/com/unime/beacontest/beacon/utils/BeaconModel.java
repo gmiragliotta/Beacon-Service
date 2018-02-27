@@ -122,7 +122,6 @@ public class BeaconModel implements Serializable {
     }
 
     public static String findUUID(final byte[] data){
-//        Log.e("Guarda qui", "findUUID: " + data.length );
         StringBuilder sb = new StringBuilder();
         for(int i = UUID_START_INDEX, offset = 0; i <= UUID_STOP_INDEX; ++i, ++offset) {
 //            Log.e("Guarda qui", "findUUID INDEX: " + i );

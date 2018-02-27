@@ -27,9 +27,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        AltBeaconManager altBeaconManager = new AltBeaconManager(this);
-//        altBeaconManager.startAltBeaconService(AltBeaconUtils.ACTION_ALT_BEACON_SCANNING);
     }
 
     @Override
@@ -65,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
             builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
             CustomFilter customFilter = builder.build();
             mService.scanning(customFilter);
-//            Toast.makeText(this, "number: " + num, Toast.LENGTH_SHORT).show();
         }
     }
 
