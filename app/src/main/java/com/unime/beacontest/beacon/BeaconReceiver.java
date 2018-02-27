@@ -2,7 +2,6 @@ package com.unime.beacontest.beacon;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
@@ -25,11 +24,9 @@ import java.util.List;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
-    private static final int SIGNAL_THRESHOLD = -100;
+    private static final int SIGNAL_THRESHOLD = -80;
     private static final int SCAN_DURATION = 3 * 1000;
    // private int numberOfBeaconDetected = 0;  TODO remove
-
-    public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -41,22 +38,16 @@ public class BeaconReceiver {
 
     private BeaconResults beaconResults = new BeaconResults();
 
-    public BeaconReceiver(Context context) {
+    public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter) {
         this.context = context;
-
-        try {
-            mBluetoothAdapter = ((BluetoothManager)
-                    context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+        this.mBluetoothAdapter = mBluetoothAdapter;
     }
 
     public Context getContext() {
         return context;
     }
 
-
+    // start scanning and return a BeaconResults instance
     public BeaconResults startScanning(CustomFilter customFilter) {
         settings = getScanSettings();
         filters = getScanFilters(customFilter);
@@ -77,19 +68,20 @@ public class BeaconReceiver {
 
     private ScanCallback getScanCallback() {
         final Handler scanHandler = new Handler();
+        final Handler mCanceller = new Handler();
 
-        // stop scan in 3 seconds
-            final Handler mCanceller = new Handler();
-            mCanceller.postDelayed(() -> {
-                if (!wasDetected) {
-                    Log.d(TAG, "No beacon detected after " + SCAN_DURATION / 1000 + " seconds: stopScanning");
-                }
-                Log.d(TAG, "Stop scanning after " + SCAN_DURATION / 1000 + " seconds");
-                mBluetoothLeScanner.stopScan(callback);
-                Intent intent = new Intent();
-                intent.setAction("ActionScanningComplete");
-                getContext().sendBroadcast(intent);
-            }, SCAN_DURATION);
+        mCanceller.postDelayed(() -> {
+            if (!wasDetected) {
+                Log.d(TAG, "No beacon detected after " + SCAN_DURATION / 1000 + " seconds: stopScanning");
+            }
+            Log.d(TAG, "Stop scanning after " + SCAN_DURATION / 1000 + " seconds");
+            mBluetoothLeScanner.stopScan(callback);
+
+            // broadcast ActionScanningComplete message
+            Intent intent = new Intent();
+            intent.setAction("ActionScanningComplete");
+            getContext().sendBroadcast(intent);
+        }, SCAN_DURATION);
 
         return new ScanCallback() {
             @Override
@@ -142,6 +134,5 @@ public class BeaconReceiver {
         filters.add(ScanFilterUtils.getScanFilter(customFilter));
 
         return filters;
-        //return null;
     }
 }

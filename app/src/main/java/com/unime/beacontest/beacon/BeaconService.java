@@ -37,9 +37,11 @@ public class BeaconService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
         beaconParser = new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         mIntentFilter.addAction("ActionScanningComplete");
         registerReceiver(beaconBroadcastReceiver, mIntentFilter);
     }
@@ -67,16 +69,15 @@ public class BeaconService extends Service {
     }
 
     public void scanning (CustomFilter customFilter) {
-        BeaconReceiver mBeaconReceiver = new BeaconReceiver(this);
-        beaconResults = mBeaconReceiver.startScanning(customFilter);
+        if(PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
+            BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter);
+            beaconResults = mBeaconReceiver.startScanning(customFilter);
+        }
     }
 
-    // TODO add sending functionality
-    public void sending (BeaconModel beaconModel) {
-        if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            getApplicationContext().startActivity(enableBtIntent);
-        } else {
+    // TODO add sending functionality Wednesday 28 implement!!!!!
+    public void sending (BeaconModel beaconModel, long delayMillis) {
+        if (PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
 
             if (beaconTransmitter.isStarted()) {
                 beaconTransmitter.stopAdvertising();
@@ -87,9 +88,8 @@ public class BeaconService extends Service {
 
             // stop advertising after 3 seconds
             Handler mCanceller = new Handler();
-            mCanceller.postDelayed(() -> beaconTransmitter.stopAdvertising(), 3000);
+            mCanceller.postDelayed(() -> beaconTransmitter.stopAdvertising(), delayMillis);
         }
-
     }
 
     private Beacon createBeacon(BeaconModel beaconModel) {
@@ -110,7 +110,7 @@ public class BeaconService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO asynchronize
+            // TODO do something with this data
             if(intent.getAction().equals(ACTION_SCANNING_COMPLETE)) {
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
             }
