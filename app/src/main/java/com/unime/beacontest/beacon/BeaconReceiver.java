@@ -1,7 +1,6 @@
 package com.unime.beacontest.beacon;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -26,7 +25,7 @@ import java.util.Set;
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
     private static final int SIGNAL_THRESHOLD = -100;
-    private static final int SCAN_DURATION = 10 * 1000; // 3 seconds
+    private static final int SCAN_DURATION = 3 * 1000;
 
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
@@ -80,9 +79,10 @@ public class BeaconReceiver {
             final Handler mCanceller = new Handler();
             mCanceller.postDelayed(() -> {
                 if (!wasDetected) {
-                    Log.d(TAG, "No beacon detected after " + SCAN_DURATION/1000 + " seconds: stopScanning");
-                    mBluetoothLeScanner.stopScan(callback);
+                    Log.d(TAG, "No beacon detected after " + SCAN_DURATION / 1000 + " seconds: stopScanning");
                 }
+                Log.d(TAG, "Stop scanning after " + SCAN_DURATION / 1000 + " seconds");
+                mBluetoothLeScanner.stopScan(callback);
             }, SCAN_DURATION);
 
         return new ScanCallback() {
@@ -95,38 +95,17 @@ public class BeaconReceiver {
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    BluetoothDevice device = result.getDevice();
-
                                     byte[] data = result.getScanRecord().getBytes();
                                     Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
-                                    BeaconModel beaconDetected = null;
 
                                     if (BeaconModel.isBeacon(data)) {
-                                        beaconDetected = new BeaconModel(
-                                                BeaconModel.findUUID(data),
-                                                BeaconModel.findMajor(data),
-                                                BeaconModel.findMinor(data),
-                                                BeaconModel.findTxPower(data), // API 26 required getTxPower method
-                                                result.getRssi(),
-                                                result.getTimestampNanos(),
-                                                device.getAddress()
-                                        );
-
                                         Intent beaconReceivedIntent =
                                                 new Intent(getContext(), BeaconBroadcastReceiver.class);
                                         beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
-                                        beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, beaconDetected);
+                                        beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, result);
                                         getContext().sendBroadcast(beaconReceivedIntent);
-                                        //wasDetected = true;
-                                        //mBluetoothLeScanner.stopScan(callback);
-//                                        Log.d(TAG, "Beacon detected: stopScanning");
-//                                        try {
-//                                            Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-//                                                    " major: " + beaconDetected.getMajor() +
-//                                                    " minor: " + beaconDetected.getMinor() + "\n");
-//                                        } catch (Exception e) {
-//                                            e.printStackTrace();
-//                                        }
+
+                                        wasDetected = true;
                                     }
 //                                    Log.d(TAG, "set: " + founded);
                                 }
