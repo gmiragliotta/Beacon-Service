@@ -2,10 +2,14 @@ package com.unime.beacontest.beacon;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -27,15 +31,17 @@ public class BeaconService extends Service {
     private BeaconParser beaconParser;
     private BluetoothAdapter mBluetoothAdapter;
     private BeaconResults beaconResults;
+    private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
+    private IntentFilter mIntentFilter = new IntentFilter();
 
     @Override
     public void onCreate() {
         super.onCreate();
-        beaconResults = new BeaconResults();
         beaconParser = new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
+        mIntentFilter.addAction("ActionScanningComplete");
+        registerReceiver(beaconBroadcastReceiver, mIntentFilter);
     }
 
     /**
@@ -50,13 +56,19 @@ public class BeaconService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(beaconBroadcastReceiver);
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
 
     public void scanning (CustomFilter customFilter) {
         BeaconReceiver mBeaconReceiver = new BeaconReceiver(this);
-        mBeaconReceiver.startScanning(customFilter);
+        beaconResults = mBeaconReceiver.startScanning(customFilter);
     }
 
     // TODO add sending functionality
@@ -90,6 +102,20 @@ public class BeaconService extends Service {
                 .setRssi(-59)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
+    }
+
+    public class BeaconBroadcastReceiver extends BroadcastReceiver {
+        public static final String ACTION_SCANNING_COMPLETE = "ActionScanningComplete";
+        private static final String TAG = "BeaconBroadcastReceiver";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO asynchronize
+            if(intent.getAction().equals(ACTION_SCANNING_COMPLETE)) {
+                Log.d(TAG, "onReceive: " + beaconResults.getResults());
+            }
+
+        }
     }
 
 }

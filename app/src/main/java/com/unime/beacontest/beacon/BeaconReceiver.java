@@ -1,6 +1,7 @@
 package com.unime.beacontest.beacon;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
@@ -14,14 +15,13 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.ConversionUtils;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
@@ -37,10 +37,9 @@ public class BeaconReceiver {
     private ScanCallback callback = getScanCallback();
     private ScanSettings settings;
     private List<ScanFilter> filters;
-
-    private static Set<BeaconModel> founded = new HashSet<>();
     private boolean wasDetected = false;
 
+    private BeaconResults beaconResults = new BeaconResults();
 
     public BeaconReceiver(Context context) {
         this.context = context;
@@ -58,11 +57,12 @@ public class BeaconReceiver {
     }
 
 
-    public void startScanning(CustomFilter customFilter) {
+    public BeaconResults startScanning(CustomFilter customFilter) {
         settings = getScanSettings();
         filters = getScanFilters(customFilter);
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
+        return beaconResults;
     }
 
     private static ScanSettings getScanSettings() {
@@ -86,6 +86,9 @@ public class BeaconReceiver {
                 }
                 Log.d(TAG, "Stop scanning after " + SCAN_DURATION / 1000 + " seconds");
                 mBluetoothLeScanner.stopScan(callback);
+                Intent intent = new Intent();
+                intent.setAction("ActionScanningComplete");
+                getContext().sendBroadcast(intent);
             }, SCAN_DURATION);
 
         return new ScanCallback() {
@@ -102,15 +105,30 @@ public class BeaconReceiver {
                                     Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
 
                                     if (BeaconModel.isBeacon(data)) {
-                                        Intent beaconReceivedIntent =
-                                                new Intent(getContext(), BeaconBroadcastReceiver.class);
-                                        beaconReceivedIntent.setAction(BeaconBroadcastReceiver.ACTION_BEACON_RECEIVED);
-                                        beaconReceivedIntent.putExtra(RECEIVED_BEACON_EXTRA, result);
-                                        getContext().sendBroadcast(beaconReceivedIntent);
+                                        BluetoothDevice device = result.getDevice();
+
+                                        Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
+                                        BeaconModel beaconDetected = new BeaconModel(
+                                                BeaconModel.findUUID(data),
+                                                BeaconModel.findMajor(data),
+                                                BeaconModel.findMinor(data),
+                                                BeaconModel.findTxPower(data), // API 26 required getTxPower method
+                                                result.getRssi(),
+                                                result.getTimestampNanos(),
+                                                device.getAddress()
+                                        );
+                                        beaconResults.addResults(beaconDetected);
+
+                                        try {
+                                            Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+                                                    " major: " + beaconDetected.getMajor() +
+                                                    " minor: " + beaconDetected.getMinor() + "\n");
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                         //Log.d(TAG, "run: " + ++numberOfBeaconDetected);
                                         wasDetected = true;
                                     }
-//                                    Log.d(TAG, "set: " + founded);
                                 }
                             });
                 }
