@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 
 import org.altbeacon.beacon.Beacon;
@@ -25,10 +26,12 @@ public class BeaconService extends Service {
     private BeaconTransmitter beaconTransmitter;
     private BeaconParser beaconParser;
     private BluetoothAdapter mBluetoothAdapter;
+    private BeaconResults beaconResults;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        beaconResults = new BeaconResults();
         beaconParser = new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -61,18 +64,19 @@ public class BeaconService extends Service {
         if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             getApplicationContext().startActivity(enableBtIntent);
+        } else {
+
+            if (beaconTransmitter.isStarted()) {
+                beaconTransmitter.stopAdvertising();
+            }
+
+            Beacon beacon = createBeacon(beaconModel);
+            beaconTransmitter.startAdvertising(beacon);
+
+            // stop advertising after 3 seconds
+            Handler mCanceller = new Handler();
+            mCanceller.postDelayed(() -> beaconTransmitter.stopAdvertising(), 3000);
         }
-
-        if (beaconTransmitter.isStarted()) {
-            beaconTransmitter.stopAdvertising();
-        }
-
-        Beacon beacon = createBeacon(beaconModel);
-        beaconTransmitter.startAdvertising(beacon);
-
-        // stop advertising after 3 seconds
-        Handler mCanceller = new Handler();
-        mCanceller.postDelayed(() -> beaconTransmitter.stopAdvertising(), 3000);
 
     }
 

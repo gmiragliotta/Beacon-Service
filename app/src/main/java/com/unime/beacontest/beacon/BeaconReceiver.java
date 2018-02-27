@@ -27,7 +27,7 @@ public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
     private static final int SIGNAL_THRESHOLD = -100;
     private static final int SCAN_DURATION = 3 * 1000;
-    private int numberOfBeaconDetected = 0; // TODO remove
+   // private int numberOfBeaconDetected = 0;  TODO remove
 
     public static final String RECEIVED_BEACON_EXTRA = "ReceivedBeaconExtra";
 
@@ -51,7 +51,6 @@ public class BeaconReceiver {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
-
     }
 
     public Context getContext() {
