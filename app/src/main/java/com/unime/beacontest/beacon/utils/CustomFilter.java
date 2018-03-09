@@ -107,7 +107,7 @@ public class CustomFilter {
             beaconLightModel.setMajor(major);
             beaconLightModel.setMinor(minor);
 
-            Log.d(TAG, ""+ Arrays.toString(manufacturerDataMask));
+            Log.d(TAG, "" + Arrays.toString(manufacturerDataMask));
 
             return new CustomFilter(filters, beaconLightModel, manufacturerDataMask);
         }

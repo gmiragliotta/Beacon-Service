@@ -3,7 +3,6 @@ package com.unime.beacontest.beacon.utils;
 import android.util.Log;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Objects;
 
 
@@ -26,7 +25,6 @@ public class BeaconModel implements Serializable {
     // ID of the beacon, in case of Android it will be Bluetooth MAC address
     private String address;
 
-
     //private static final int PROTOCOL_OFFSET = 3;
     private static final int PROTOCOL_OFFSET = 0;
     private static final int AD_LENGTH_INDEX = 0 + PROTOCOL_OFFSET;
@@ -42,14 +40,18 @@ public class BeaconModel implements Serializable {
 
     public BeaconModel(String uuid, String major, String minor, int txPower, int rssi, long timestamp, String address){
         this.uuid = uuid;
-        //this.arguments = arguments;
         this.major = major;
         this.minor = minor;
         this.txPower = txPower;
         this.rssi = rssi;
         this.timestamp = timestamp;
         this.address = address;
+    }
 
+    public BeaconModel(String uuid, String major, String minor){
+        this.uuid = uuid;
+        this.major = major;
+        this.minor = minor;
     }
 
     public String getUuid(){
@@ -80,14 +82,14 @@ public class BeaconModel implements Serializable {
         return this.address;
     }
 
-    /*protected void setArguments(String arguments){
-        this.arguments = arguments;
-    }*/
-
     public void setUuid(String uuid) {
 
         this.uuid = (uuid.substring(0,8) + "-" + uuid.substring(8, 12) + "-" +
                 uuid.substring(12, 16) + "-" + uuid.substring(16, 32));
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setTxPower(int txPower) {
@@ -144,20 +146,6 @@ public class BeaconModel implements Serializable {
 
         String minor = String.format("%02x%02x", data[ARGS_START_INDEX + 2], data[ARGS_START_INDEX + 3]);
         return minor;
-    }
-
-    protected static BeaconModel updateBeaconById(ArrayList<BeaconModel> founded, String address, String major, String minor){
-        BeaconModel aux;
-        for (int i=0; i<founded.size(); i++){
-            if(address.equals(founded.get(i).getAddress())){
-                aux = founded.get(i);
-                //aux.setArguments(arguments);
-                aux.setMajor(major);
-                aux.setMinor(minor);
-                founded.set(i, aux);
-            }
-        }
-        return null;
     }
 
     public static int findTxPower(final byte[] data) {

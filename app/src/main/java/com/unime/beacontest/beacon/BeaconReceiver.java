@@ -24,9 +24,6 @@ import java.util.List;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
-    private static final int SIGNAL_THRESHOLD = -80;
-    private static final int SCAN_DURATION = 3 * 1000;
-   // private int numberOfBeaconDetected = 0;  TODO remove
 
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
@@ -35,6 +32,8 @@ public class BeaconReceiver {
     private ScanSettings settings;
     private List<ScanFilter> filters;
     private boolean wasDetected = false;
+    private int signalThreshold;
+    private  int scanDuration;
 
     private BeaconResults beaconResults = new BeaconResults();
 
@@ -48,7 +47,9 @@ public class BeaconReceiver {
     }
 
     // start scanning and return a BeaconResults instance
-    public BeaconResults startScanning(CustomFilter customFilter) {
+    public BeaconResults startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
+        this.signalThreshold = signalThreshold;
+        this.scanDuration = scanDuration * 1000;
         settings = getScanSettings();
         filters = getScanFilters(customFilter);
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
@@ -72,23 +73,23 @@ public class BeaconReceiver {
 
         mCanceller.postDelayed(() -> {
             if (!wasDetected) {
-                Log.d(TAG, "No beacon detected after " + SCAN_DURATION / 1000 + " seconds: stopScanning");
+                Log.d(TAG, "No beacon detected after " + scanDuration / 1000 + " seconds: stopScanning");
             }
-            Log.d(TAG, "Stop scanning after " + SCAN_DURATION / 1000 + " seconds");
+            Log.d(TAG, "Stop scanning after " + scanDuration / 1000 + " seconds");
             mBluetoothLeScanner.stopScan(callback);
 
             // broadcast ActionScanningComplete message
             Intent intent = new Intent();
             intent.setAction("ActionScanningComplete");
             getContext().sendBroadcast(intent);
-        }, SCAN_DURATION);
+        }, scanDuration);
 
         return new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, final ScanResult result) {
                 final int RSSI = result.getRssi();
 
-                if (RSSI >= SIGNAL_THRESHOLD) {
+                if (RSSI >= signalThreshold) {
                     scanHandler.post(
                             new Runnable() {
                                 @Override

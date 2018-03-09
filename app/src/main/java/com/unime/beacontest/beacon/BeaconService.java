@@ -68,14 +68,13 @@ public class BeaconService extends Service {
         return mBinder;
     }
 
-    public void scanning (CustomFilter customFilter) {
+    public void scanning (CustomFilter customFilter, int signalThreshold, int scanDuration) {
         if(PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
             BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter);
-            beaconResults = mBeaconReceiver.startScanning(customFilter);
+            beaconResults = mBeaconReceiver.startScanning(customFilter, signalThreshold, scanDuration);
         }
     }
 
-    // TODO add sending functionality Wednesday 28 implement!!!!!
     public void sending (BeaconModel beaconModel, long delayMillis) {
         if (PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
 
@@ -93,6 +92,8 @@ public class BeaconService extends Service {
     }
 
     private Beacon createBeacon(BeaconModel beaconModel) {
+        // TODO check beaconModel constructor
+        // it works with
         return new Beacon.Builder()
                 .setId1(beaconModel.getUuid())
                 .setId2(beaconModel.getMajor())

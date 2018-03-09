@@ -21,6 +21,25 @@ public class Filter {
     private int endDataPosition;
 
     public Filter(int type, String data, int startDataPosition, int endDataPosition) {
+        // check if arguments are valid
+        switch(type) {
+            case UUID_TYPE:
+                if(startDataPosition < 0 || endDataPosition > 15)
+                    throw new IllegalArgumentException("startDataPosition < 0 or endDataPosition >= 16");
+                break;
+            case MAJOR_TYPE:
+            case MINOR_TYPE:
+                if(startDataPosition < 0 || endDataPosition > 1)
+                    throw new IllegalArgumentException("startDataPosition < 0 or endDataPosition >= 2");
+                break;
+            default:
+                throw new UnsupportedOperationException("Invalid type: " + type);
+        }
+
+        if(data.length() != ((endDataPosition+1) - startDataPosition) * 2)
+            throw new IllegalArgumentException("string length must be of " +
+                    ((endDataPosition+1) - startDataPosition) * 2);
+
         this.type = type;
         this.data = data;
         this.startDataPosition = startDataPosition;
