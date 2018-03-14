@@ -2,10 +2,12 @@ package com.unime.beacontest.beacon.utils;
 
 import android.support.annotation.NonNull;
 
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public class ConversionUtils {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
 
     private ConversionUtils()
         {
@@ -90,5 +92,18 @@ public class ConversionUtils {
             sb.append(String.format("%02x", data[i]));
         }
         return sb.toString();
+    }
+
+
+
+    public static byte[] longToBytes(long x) {
+        buffer.putLong(0, x);
+        return buffer.array();
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip();//need flip
+        return buffer.getLong();
     }
 }
