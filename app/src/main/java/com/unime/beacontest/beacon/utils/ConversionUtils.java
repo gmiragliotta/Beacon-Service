@@ -2,6 +2,8 @@ package com.unime.beacontest.beacon.utils;
 
 import android.support.annotation.NonNull;
 
+import com.google.common.io.BaseEncoding;
+
 import java.util.UUID;
 
 public class ConversionUtils {
@@ -90,5 +92,9 @@ public class ConversionUtils {
             sb.append(String.format("%02x", data[i]));
         }
         return sb.toString();
+    }
+
+    public static byte[] hexToBytes(String data) {
+        return BaseEncoding.base16().lowerCase().decode(data);
     }
 }

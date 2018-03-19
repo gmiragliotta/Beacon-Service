@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -77,9 +78,12 @@ public class BeaconService extends Service {
             Beacon beacon = createBeacon(beaconModel);
             beaconTransmitter.startAdvertising(beacon);
 
-            // stop advertising after 3 seconds
+            // stop advertising after  delayMillis
             Handler mCanceller = new Handler();
-            mCanceller.postDelayed(() -> beaconTransmitter.stopAdvertising(), delayMillis);
+            mCanceller.postDelayed(() -> {
+                beaconTransmitter.stopAdvertising();
+                Log.d(TAG, "Advertisement stopped after " + (delayMillis / 1000) + " seconds");
+                }, delayMillis);
         }
     }
 
@@ -90,7 +94,7 @@ public class BeaconService extends Service {
                 .setId1(beaconModel.getUuid())
                 .setId2(beaconModel.getMajor())
                 .setId3(beaconModel.getMinor())
-                .setManufacturer(0x0118) // Radius network
+                .setManufacturer(0x8888) //  TODO custom company id
                 .setTxPower(-59)
                 .setRssi(-59)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields

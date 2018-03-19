@@ -1,5 +1,9 @@
 package com.unime.beacontest;
 
+import android.util.Log;
+
+import com.unime.beacontest.beacon.utils.ConversionUtils;
+
 import java.security.MessageDigest;
 
 import javax.crypto.Cipher;
@@ -9,26 +13,21 @@ import javax.crypto.spec.SecretKeySpec;
 // https://gist.github.com/itarato/abef95871756970a9dad
 
 public class AES256 {
+    public static final String TAG = "AES256";
     public static final int ivSize = 16;
     public static final int keySize = 32;
 
-    /* public static void main(String[] args) throws Exception {
-        String key = "12345678123456781234567812345678";
-        String clean = "prova1234512345";
+
+
 
         // Generating IV.
-        byte[] iv = new byte[ivSize];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
 
-        byte[] encrypted = encrypt(clean, key, iv);
+        //System.out.println("dec: " + decrypted);
 
-        String decrypted = decrypt(encrypted, key, iv);
-
-        System.out.println("dec: " + decrypted);
-    } */
 
     public  static byte[] encrypt(String plainText, String key, byte[] iv) throws Exception {
+        Log.d(TAG, "encrypt iv: " + ConversionUtils.byteToHex(iv));
+
         byte[] clean = plainText.getBytes();
 
 

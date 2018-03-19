@@ -16,6 +16,12 @@ import android.widget.EditText;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.beacontest.beacon.utils.CustomFilter;
+import com.unime.beacontest.beacon.utils.Filter;
+
+import static com.unime.beacontest.AES256.decrypt;
+import static com.unime.beacontest.AES256.encrypt;
+import static com.unime.beacontest.beacon.utils.ConversionUtils.hexToBytes;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -65,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
     /** Called when a button is clicked (the button in the layout file attaches to
      * this method with the android:onClick attribute) */
     public void onButtonClick(View v) {
+        int buttonClickedId = v.getId();
         Log.d(TAG, "onButtonClick: start");
         if (mBound) {
             Log.d(TAG, "onButtonClick: bounded");
@@ -72,25 +79,48 @@ public class MainActivity extends AppCompatActivity {
             // However, if this call were something that might hang, then this request should
             // occur in a separate thread to avoid slowing down the activity performance.
 
-            /* CustomFilter.Builder builder = new CustomFilter.Builder();
-            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
-            builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
-            builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
-            builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
-            //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
-            CustomFilter customFilter = builder.build();
-            beaconResults = mService.scanning(customFilter, -70, 3); */
 
-            String command = editTextCommand.getText().toString();
-            String counter = editTextCounter.getText().toString();
-            String idObject = editIdObj.getText().toString();
-            String idUser = editIdUser.getText().toString();
+            if(buttonClickedId == R.id.btnSend) {
 
-            BeaconCommand beaconCommand = new BeaconCommand(
-                 idUser, idObject, Long.parseLong(counter), command
-            );
+                String command = editTextCommand.getText().toString();
+                String counter = editTextCounter.getText().toString();
+                String idObject = editIdObj.getText().toString();
+                String idUser = editIdUser.getText().toString();
 
-            beaconCommand.getBeaconModel();
+                BeaconCommand beaconCommand = new BeaconCommand(
+                        idUser, idObject, Long.parseLong(counter), command
+                );
+
+                mService.sending(beaconCommand.getBeaconModel(), 15000);
+            } else {
+                CustomFilter.Builder builder = new CustomFilter.Builder();
+                builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
+                builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
+                builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
+                builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
+                //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
+                CustomFilter customFilter = builder.build();
+                beaconResults = mService.scanning(customFilter, -70, 3);
+            }
+
+//            byte[] iv = new byte[ivSize];
+//            SecureRandom random = new SecureRandom();
+//            random.nextBytes(iv);
+//
+            String key = "12345678123456781234567812345678";
+            String clean = "prova1234512345";
+            byte[] iv = hexToBytes("efaa299f48510f04181eb53b42ff1c01");
+
+            try {
+                byte[] encrypted = encrypt(clean, key, iv);
+
+                String decrypted = decrypt(encrypted, key, iv);
+                Log.d(TAG, "onButtonClick: decrypted " + decrypted);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
             //Long prova = Long.parseLong(counter);
 
             // String encryptedUuid = "";
@@ -98,12 +128,7 @@ public class MainActivity extends AppCompatActivity {
             //Log.d(TAG, "onButtonClick: " + ConversionUtils.longToBytes(prova).length);
             //mService.sending(new BeaconModel(encryptedUuid, idObject, "0000"), 5000);
 
-//            mService.sending(
-//                    new BeaconModel(
-//                            "00000001-0002-025f-1234-0000fd200001",
-//                            "0001",
-//                            "0000"
-//                    ),5000);
+
         }
     }
 

@@ -36,7 +36,7 @@ public class BeaconModel implements Serializable {
     private static final int TXPOWER_INDEX = ARGS_START_INDEX + 4;
     private static final int AD_LENGTH_VALUE = 0x1b;
     private static final int AD_TYPE_VALUE = 0xff;
-    private static final int BEACON_CODE_VALUE = 0xbeac;
+    private static final int BEACON_TYPE_CODE = 0xbeac;
 
     public BeaconModel(String uuid, String major, String minor, int txPower, int rssi, long timestamp, String address){
         this.uuid = uuid;
@@ -118,7 +118,7 @@ public class BeaconModel implements Serializable {
         if ((data[AD_TYPE_INDEX] & 0xff) != AD_TYPE_VALUE)
             return false;
         final int code = ((data[BEACON_CODE_INDEX] << 8) & 0x0000ff00) | ((data[BEACON_CODE_INDEX + 1]) & 0x000000ff);
-        if(code != BEACON_CODE_VALUE)
+        if(code != BEACON_TYPE_CODE)
             return false;
         return true;
     }
@@ -126,7 +126,6 @@ public class BeaconModel implements Serializable {
     public static String findUUID(final byte[] data){
         StringBuilder sb = new StringBuilder();
         for(int i = UUID_START_INDEX, offset = 0; i <= UUID_STOP_INDEX; ++i, ++offset) {
-//            Log.e("Guarda qui", "findUUID INDEX: " + i );
             sb.append(String.format("%02x", (int)(data[i] & 0xff)));
             if (offset == 3 || offset == 5 || offset == 7 || offset == 9) {
                 sb.append("-");

@@ -91,37 +91,34 @@ public class BeaconReceiver {
 
                 if (RSSI >= signalThreshold) {
                     scanHandler.post(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    byte[] data = result.getScanRecord().getBytes();
+                            () -> {
+                                byte[] data = result.getScanRecord().getBytes();
+                                Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
+
+                                if (BeaconModel.isBeacon(data)) {
+                                    BluetoothDevice device = result.getDevice();
+
                                     Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
+                                    BeaconModel beaconDetected = new BeaconModel(
+                                            BeaconModel.findUUID(data),
+                                            BeaconModel.findMajor(data),
+                                            BeaconModel.findMinor(data),
+                                            BeaconModel.findTxPower(data), // API 26 required getTxPower method
+                                            result.getRssi(),
+                                            result.getTimestampNanos(),
+                                            device.getAddress()
+                                    );
+                                    beaconResults.addResults(beaconDetected);
 
-                                    if (BeaconModel.isBeacon(data)) {
-                                        BluetoothDevice device = result.getDevice();
-
-                                        Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
-                                        BeaconModel beaconDetected = new BeaconModel(
-                                                BeaconModel.findUUID(data),
-                                                BeaconModel.findMajor(data),
-                                                BeaconModel.findMinor(data),
-                                                BeaconModel.findTxPower(data), // API 26 required getTxPower method
-                                                result.getRssi(),
-                                                result.getTimestampNanos(),
-                                                device.getAddress()
-                                        );
-                                        beaconResults.addResults(beaconDetected);
-
-                                        try {
-                                            Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-                                                    " major: " + beaconDetected.getMajor() +
-                                                    " minor: " + beaconDetected.getMinor() + "\n");
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        //Log.d(TAG, "run: " + ++numberOfBeaconDetected);
-                                        wasDetected = true;
+                                    try {
+                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+                                                " major: " + beaconDetected.getMajor() +
+                                                " minor: " + beaconDetected.getMinor() + "\n");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
+                                    //Log.d(TAG, "run: " + ++numberOfBeaconDetected);
+                                    wasDetected = true;
                                 }
                             });
                 }
