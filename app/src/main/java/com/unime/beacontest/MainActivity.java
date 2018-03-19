@@ -19,10 +19,6 @@ import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.Filter;
 
-import static com.unime.beacontest.AES256.decrypt;
-import static com.unime.beacontest.AES256.encrypt;
-import static com.unime.beacontest.beacon.utils.ConversionUtils.hexToBytes;
-
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
@@ -82,14 +78,20 @@ public class MainActivity extends AppCompatActivity {
 
             if(buttonClickedId == R.id.btnSend) {
 
-                String command = editTextCommand.getText().toString();
-                String counter = editTextCounter.getText().toString();
-                String idObject = editIdObj.getText().toString();
-                String idUser = editIdUser.getText().toString();
+                //String command = editTextCommand.getText().toString();
+                //String counter = editTextCounter.getText().toString();
+                //String idObject = editIdObj.getText().toString();
+                //String idUser = editIdUser.getText().toString();
+                String command = "0123456789";
+                String counter = "255";
+                String idObject = "1234";
+                String idUser = "7689";
+
 
                 BeaconCommand beaconCommand = new BeaconCommand(
                         idUser, idObject, Long.parseLong(counter), command
                 );
+
 
                 mService.sending(beaconCommand.getBeaconModel(), 15000);
             } else {
@@ -107,18 +109,6 @@ public class MainActivity extends AppCompatActivity {
 //            SecureRandom random = new SecureRandom();
 //            random.nextBytes(iv);
 //
-            String key = "9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45";
-            String clean = "prova1234512345";
-            byte[] iv = hexToBytes("efaa299f48510f04181eb53b42ff1c01");
-
-            try {
-                byte[] encrypted = encrypt(clean, hexToBytes(key), iv);
-
-                String decrypted = decrypt(encrypted, hexToBytes(key), iv);
-                Log.d(TAG, "onButtonClick: decrypted " + decrypted);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
 
             //Long prova = Long.parseLong(counter);

@@ -3,8 +3,14 @@ package com.unime.beacontest;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
+import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import com.unime.beacontest.beacon.utils.BeaconModel;
+
+import static com.unime.beacontest.AES256.decrypt;
+import static com.unime.beacontest.AES256.encrypt;
+import static com.unime.beacontest.beacon.utils.ConversionUtils.byteToHex;
+import static com.unime.beacontest.beacon.utils.ConversionUtils.hexToBytes;
 
 public class BeaconCommand {
     public static final String TAG = "BeaconCommand";
@@ -66,7 +72,9 @@ public class BeaconCommand {
     public BeaconModel getBeaconModel() {
         byte[] userIdBytes = BaseEncoding.base16().decode(getUserId());
         byte[] commandBytes = BaseEncoding.base16().decode(getCommand());
+        System.out.println("commandbytes: " + commandBytes.length);
         byte[] counterBytes = Longs.toByteArray(getCounter());
+        System.out.println("counterbytes: " + counterBytes.length);
         byte[] fillByte = BaseEncoding.base16().decode("00");
         byte[] objectIdBytes = BaseEncoding.base16().decode(getObjId());
         byte[] extraBytes = BaseEncoding.base16().decode(getExtra());
@@ -76,6 +84,26 @@ public class BeaconCommand {
         System.arraycopy(commandBytes, 0, data, COMMAND_INDEX, COMMAND_SIZE);
         System.arraycopy(fillByte, 0, data, FILL_INDEX, FILL_SIZE);
 
+        String key = "9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45";
+        byte[] clean = Bytes.concat(Bytes.concat(userIdBytes, commandBytes),
+                Bytes.concat(counterBytes,fillByte));
+        System.out.println("Problem: " + clean.length);
+
+
+        byte[] iv = hexToBytes("efaa299f48510f04181eb53b42ff1c01");
+
+        byte[] encrypted = null;
+        try {
+            encrypted = encrypt(clean, hexToBytes(key), iv);
+            Log.d(TAG, "encrypted: " + byteToHex(encrypted));
+
+            String decrypted = decrypt(encrypted, hexToBytes(key), iv);
+            Log.d(TAG, "onButtonClick: decrypted " + decrypted);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // major and minor
         System.arraycopy(objectIdBytes, 0, data, OBJECT_ID_INDEX, OBJECT_ID_SIZE);
         System.arraycopy(extraBytes, 0, data, EXTRA_INDEX, EXTRA_SIZE);
 
@@ -83,7 +111,7 @@ public class BeaconCommand {
                 commandBytes.length + "-" + counterBytes.length);
 
         // let's build the beacon
-        return new BeaconModel(findUUID(data), findMajor(data), findMinor(data));
+        return new BeaconModel(findUUID(encrypted), findMajor(data), findMinor(data));
     }
 
     private String findUUID(final byte[] data){

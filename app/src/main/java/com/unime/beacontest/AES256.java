@@ -2,13 +2,11 @@ package com.unime.beacontest;
 
 import android.util.Log;
 
-import com.unime.beacontest.beacon.utils.ConversionUtils;
-
-import java.security.MessageDigest;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import static com.unime.beacontest.beacon.utils.ConversionUtils.byteToHex;
 
 // https://gist.github.com/itarato/abef95871756970a9dad
 
@@ -25,23 +23,24 @@ public class AES256 {
         //System.out.println("dec: " + decrypted);
 
 
-    public  static byte[] encrypt(String plainText, byte[] key, byte[] iv) throws Exception {
-        Log.d(TAG, "encrypt iv: " + ConversionUtils.byteToHex(iv));
+    public  static byte[] encrypt(byte[] clean, byte[] key, byte[] iv) throws Exception {
+        Log.d(TAG, "encrypt iv: " + byteToHex(iv));
 
-        byte[] clean = plainText.getBytes();
+        // byte[] clean = plainText.getBytes();
 
 
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
         // Hashing key.
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(key);
-        byte[] keyBytes = new byte[keySize];
-        System.arraycopy(digest.digest(), 0, keyBytes, 0, keyBytes.length);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+        //MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        //digest.update(key);
+
+        //byte[] keyBytes = new byte[keySize];
+        //System.arraycopy(digest.digest(), 0, keyBytes, 0, keyBytes.length);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
 
         // Encrypt.
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
         byte[] encrypted = cipher.doFinal(clean);
 
@@ -64,18 +63,18 @@ public class AES256 {
         System.arraycopy(encryptedTextBytes, 0, encryptedBytes, 0, encryptedSize);
 
         // Hash key.
-        byte[] keyBytes = new byte[keySize];
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        md.update(key);
-        System.arraycopy(md.digest(), 0, keyBytes, 0, keyBytes.length);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
+        //byte[] keyBytes = new byte[keySize];
+        //MessageDigest md = MessageDigest.getInstance("SHA-256");
+        //md.update(key);
+        //System.arraycopy(md.digest(), 0, keyBytes, 0, keyBytes.length);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
 
         // Decrypt.
-        Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Cipher cipherDecrypt = Cipher.getInstance("AES/CBC/NoPadding");
         cipherDecrypt.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
         byte[] decrypted = cipherDecrypt.doFinal(encryptedBytes);
 
-        return new String(decrypted);
+        return byteToHex(decrypted);
     }
 }
 
