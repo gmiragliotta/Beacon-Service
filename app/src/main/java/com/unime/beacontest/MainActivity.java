@@ -107,14 +107,14 @@ public class MainActivity extends AppCompatActivity {
 //            SecureRandom random = new SecureRandom();
 //            random.nextBytes(iv);
 //
-            String key = "12345678123456781234567812345678";
+            String key = "9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45";
             String clean = "prova1234512345";
             byte[] iv = hexToBytes("efaa299f48510f04181eb53b42ff1c01");
 
             try {
-                byte[] encrypted = encrypt(clean, key, iv);
+                byte[] encrypted = encrypt(clean, hexToBytes(key), iv);
 
-                String decrypted = decrypt(encrypted, key, iv);
+                String decrypted = decrypt(encrypted, hexToBytes(key), iv);
                 Log.d(TAG, "onButtonClick: decrypted " + decrypted);
             } catch (Exception e) {
                 e.printStackTrace();

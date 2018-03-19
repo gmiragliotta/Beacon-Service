@@ -25,7 +25,7 @@ public class AES256 {
         //System.out.println("dec: " + decrypted);
 
 
-    public  static byte[] encrypt(String plainText, String key, byte[] iv) throws Exception {
+    public  static byte[] encrypt(String plainText, byte[] key, byte[] iv) throws Exception {
         Log.d(TAG, "encrypt iv: " + ConversionUtils.byteToHex(iv));
 
         byte[] clean = plainText.getBytes();
@@ -35,7 +35,7 @@ public class AES256 {
 
         // Hashing key.
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        digest.update(key.getBytes("UTF-8"));
+        digest.update(key);
         byte[] keyBytes = new byte[keySize];
         System.arraycopy(digest.digest(), 0, keyBytes, 0, keyBytes.length);
         SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
@@ -54,7 +54,7 @@ public class AES256 {
         return encrypted;
     }
 
-    public static String decrypt(byte[] encryptedTextBytes, String key, byte[] iv) throws Exception {
+    public static String decrypt(byte[] encryptedTextBytes, byte[] key, byte[] iv) throws Exception {
 
         IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
@@ -66,7 +66,7 @@ public class AES256 {
         // Hash key.
         byte[] keyBytes = new byte[keySize];
         MessageDigest md = MessageDigest.getInstance("SHA-256");
-        md.update(key.getBytes());
+        md.update(key);
         System.arraycopy(md.digest(), 0, keyBytes, 0, keyBytes.length);
         SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "AES");
 
