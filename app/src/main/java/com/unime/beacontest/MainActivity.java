@@ -18,6 +18,7 @@ import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 import com.unime.beacontest.beacon.utils.Filter;
+import com.unime.beacontest.objectinteraction.BeaconCommand;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";

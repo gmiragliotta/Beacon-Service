@@ -14,17 +14,13 @@ public class AES256 {
     public static final String TAG = "AES256";
     public static final int ivSize = 16;
     public static final int keySize = 32;
-
-
-
-
         // Generating IV.
 
         //System.out.println("dec: " + decrypted);
 
 
-    public  static byte[] encrypt(byte[] clean, byte[] key, byte[] iv) throws Exception {
-        Log.d(TAG, "encrypt iv: " + byteToHex(iv));
+    public  static byte[] encrypt(byte[] plainText, byte[] key, byte[] iv) throws Exception {
+        Log.d(TAG, "encrypt iv: " + byteToHex(iv)); // TODO use guava
 
         // byte[] clean = plainText.getBytes();
 
@@ -42,7 +38,7 @@ public class AES256 {
         // Encrypt.
         Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-        byte[] encrypted = cipher.doFinal(clean);
+        byte[] encrypted = cipher.doFinal(plainText);
 
         // Combine IV and encrypted part.
         byte[] encryptedIVAndText = new byte[ivSize + encrypted.length];
