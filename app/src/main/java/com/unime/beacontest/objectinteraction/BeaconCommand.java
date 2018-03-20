@@ -3,14 +3,15 @@ package com.unime.beacontest.objectinteraction;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
-import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.Settings;
+
+import org.altbeacon.beacon.Beacon;
+
+import java.util.Arrays;
 
 import static com.unime.beacontest.AES256.decrypt;
 import static com.unime.beacontest.AES256.encrypt;
-import static com.unime.beacontest.beacon.utils.ConversionUtils.byteToHex;
-import static com.unime.beacontest.beacon.utils.ConversionUtils.hexToBytes;
 
 /* BeaconCommand format.
  *
@@ -59,6 +60,12 @@ public class BeaconCommand {
 
     private byte[] dataPayload = new byte[DATA_PAYLOAD_SIZE];
     private byte[] encryptedDataPayload = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
+
+    private Beacon beacon;
+
+    // todo remove this initialization after test
+    private byte[] key;
+    private byte[] iv;
 
 
     public BeaconCommand() {
@@ -111,62 +118,45 @@ public class BeaconCommand {
         dataPayload[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
     }
 
+    public void setKey(byte[] key) {
+        this.key = key;
+    }
 
+    public void setIv(byte[] iv) {
+        this.iv = iv;
+    }
 
+    public Beacon build() {
+        // Encrypt Payload Data (first 16 Bytes)
+        byte[] payloadToEncrypt = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
+        System.arraycopy(dataPayload, 0, payloadToEncrypt, 0, ENCRYPTED_DATA_PAYLOAD_SIZE);
 
-    
-
-
-
-
-    public BeaconModel getBeaconModel() {
-        byte[] userIdBytes = BaseEncoding.base16().decode(getUserId());
-        byte[] commandBytes = BaseEncoding.base16().decode(getCommand());
-        System.out.println("commandbytes: " + commandBytes.length);
-        byte[] counterBytes = Longs.toByteArray(getCounter());
-        System.out.println("counterbytes: " + counterBytes.length);
-        byte[] fillByte = BaseEncoding.base16().decode("00");
-        byte[] objectIdBytes = BaseEncoding.base16().decode(getObjId());
-        byte[] extraBytes = BaseEncoding.base16().decode(getExtra());
-
-        System.arraycopy(userIdBytes, 0, dataPayload, USER_ID_INDEX, USER_ID_SIZE);
-        System.arraycopy(counterBytes, 0, dataPayload, COUNTER_INDEX, COUNTER_SIZE);
-        System.arraycopy(commandBytes, 0, dataPayload, COMMAND_INDEX, COMMAND_SIZE);
-        System.arraycopy(fillByte, 0, dataPayload, FILL_INDEX, RESERVED_SIZE);
-
-        String key = "9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45";
-        byte[] clean = Bytes.concat(Bytes.concat(userIdBytes, commandBytes),
-                Bytes.concat(counterBytes,fillByte));
-        System.out.println("Problem: " + clean.length);
-
-
-        byte[] iv = hexToBytes("efaa299f48510f04181eb53b42ff1c01");
-
-        byte[] encrypted = null;
         try {
-            encrypted = encrypt(clean, hexToBytes(key), iv);
-            Log.d(TAG, "encrypted: " + byteToHex(encrypted));
+            encryptedDataPayload = encrypt(payloadToEncrypt, key, iv);
+            Log.d(TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
 
-            String decrypted = decrypt(encrypted, hexToBytes(key), iv);
-            Log.d(TAG, "onButtonClick: decrypted " + decrypted);
+            Log.d(TAG, "decrypted: " +
+                    BaseEncoding.base16().lowerCase().decode(decrypt(encryptedDataPayload, key, iv)));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // major and minor
-        System.arraycopy(objectIdBytes, 0, dataPayload, OBJECT_ID_INDEX, OBJECT_ID_SIZE);
-        System.arraycopy(extraBytes, 0, dataPayload, EXTRA_INDEX, EXTRA_SIZE);
+        return new Beacon.Builder()
+                .setId1(findUUID(encryptedDataPayload))
+                .setId2(findMajor(dataPayload))
+                .setId3(findMinor(dataPayload))
+                .setManufacturer(Settings.MANUFACTURER_ID)
+                .setTxPower(Settings.TX_POWER)
+                .setRssi(Settings.RSSI)
+                .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
+                .build();
 
-        Log.d("BeaconCommand", "getBeaconModel: " + userIdBytes.length + "-" +
-                commandBytes.length + "-" + counterBytes.length);
-
-        // let's build the beacon
-        return new BeaconModel(findUUID(encrypted), findMajor(dataPayload), findMinor(dataPayload));
     }
+
 
     private String findUUID(final byte[] data){
         StringBuilder sb = new StringBuilder();
-        for(int i = USER_ID_INDEX, offset = 0; i <= OBJECT_ID_INDEX-1; ++i, ++offset) {
+        for(int i = COUNTER_INDEX, offset = 0; i <= ENCRYPTED_DATA_PAYLOAD_SIZE-1; ++i, ++offset) {
 
             sb.append(String.format("%02x", (int)(data[i] & 0xff)));
             if (offset == 3 || offset == 5 || offset == 7 || offset == 9) {

@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.common.io.BaseEncoding;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText editTextCommand;
     private EditText editIdObj;
     private EditText editIdUser;
+
+    private byte[] key = BaseEncoding.base16().lowerCase().decode("9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45");
+    private byte[] iv = BaseEncoding.base16().lowerCase().decode("efaa299f48510f04181eb53b42ff1c01");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,18 +87,25 @@ public class MainActivity extends AppCompatActivity {
                 //String counter = editTextCounter.getText().toString();
                 //String idObject = editIdObj.getText().toString();
                 //String idUser = editIdUser.getText().toString();
-                String command = "0123456789";
-                String counter = "255";
-                String idObject = "1234";
-                String idUser = "7689";
+                //String command = "0123456789";
+                Long counter = 255L;
+                //String idObject = "1234";
+                //String idUser = "7689";
 
 
-                BeaconCommand beaconCommand = new BeaconCommand(
-                        idUser, idObject, Long.parseLong(counter), command
-                );
+                BeaconCommand beaconCommand = new BeaconCommand();
+                beaconCommand.setBitmap((byte)0b00010000); // TODO forse qualche problemino
+                beaconCommand.setCounter(counter);
+                beaconCommand.setCommandType("01"); // TODO cast all to integer
+                beaconCommand.setCommandClass("01");
+                beaconCommand.setCommandOpCode("00");
+                beaconCommand.setParameters("00", "00");
+                beaconCommand.setUserId("0001");
+                beaconCommand.setObjectId("01", "02");
+                beaconCommand.setKey(key);
+                beaconCommand.setIv(iv);
 
-
-                mService.sending(beaconCommand.getBeaconModel(), 15000);
+                mService.sending(beaconCommand.build(), 15000);
             } else {
                 CustomFilter.Builder builder = new CustomFilter.Builder();
                 builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));

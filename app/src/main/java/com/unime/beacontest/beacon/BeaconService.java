@@ -8,15 +8,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BeaconTransmitter;
-
-import java.util.Arrays;
 
 public class BeaconService extends Service {
     public static final String TAG = "ReceiverService";
@@ -68,39 +65,21 @@ public class BeaconService extends Service {
         return null;
     }
 
-    public void sending (BeaconModel beaconModel, long delayMillis) {
+    public void sending (Beacon beacon, long delayMillis) {
         if (PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
 
             if (beaconTransmitter.isStarted()) {
                 beaconTransmitter.stopAdvertising();
             }
 
-            Beacon beacon = createBeacon(beaconModel);
             beaconTransmitter.startAdvertising(beacon);
 
             // stop advertising after  delayMillis
             Handler mCanceller = new Handler();
             mCanceller.postDelayed(() -> {
-                beaconTransmitter.stopAdvertising();
+                beaconTransmitter.stopAdvertising(); // todo place a control isStarted
                 Log.d(TAG, "Advertisement stopped after " + (delayMillis / 1000) + " seconds");
                 }, delayMillis);
         }
     }
-
-    private Beacon createBeacon(BeaconModel beaconModel) {
-        // TODO check beaconModel constructor
-        // it works with
-        return new Beacon.Builder()
-                .setId1(beaconModel.getUuid())
-                .setId2(beaconModel.getMajor())
-                .setId3(beaconModel.getMinor())
-                .setManufacturer(0x8888) //  TODO custom company id
-                .setTxPower(-59)
-                .setRssi(-59)
-                .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
-                .build();
-    }
-
-
-
 }
