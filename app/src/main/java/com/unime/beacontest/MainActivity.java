@@ -94,9 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                 BeaconCommand beaconCommand = new BeaconCommand();
-                beaconCommand.setBitmap((byte)0b00010000); // TODO forse qualche problemino
+                beaconCommand.setBitmap((byte)0b11111111); // it works!
                 beaconCommand.setCounter(counter);
-                beaconCommand.setCommandType("01"); // TODO cast all to integer
+                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
                 beaconCommand.setCommandClass("01");
                 beaconCommand.setCommandOpCode("00");
                 beaconCommand.setParameters("00", "00");
@@ -116,21 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 CustomFilter customFilter = builder.build();
                 beaconResults = mService.scanning(customFilter, -70, 3);
             }
-
-//            byte[] iv = new byte[ivSize];
-//            SecureRandom random = new SecureRandom();
-//            random.nextBytes(iv);
-//
-
-
-            //Long prova = Long.parseLong(counter);
-
-            // String encryptedUuid = "";
-
-            //Log.d(TAG, "onButtonClick: " + ConversionUtils.longToBytes(prova).length);
-            //mService.sending(new BeaconModel(encryptedUuid, idObject, "0000"), 5000);
-
-
         }
     }
 

@@ -8,6 +8,7 @@ import com.unime.beacontest.beacon.Settings;
 
 import org.altbeacon.beacon.Beacon;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import static com.unime.beacontest.AES256.decrypt;
@@ -99,12 +100,23 @@ public class BeaconCommand {
         dataPayload[PARAMETERS_OFFSET + 1] = BaseEncoding.base16().decode(hexParameter2)[0];
     }
 
-    public void setBitmap(byte bitmap) {        // TODO Use binary literals 0b11111111 to test
+    // Bitmap input parameter: (byte)0b11111111
+    public void setBitmap(byte bitmap) {
         dataPayload[BITMAP_OFFSET] = bitmap;
     }
 
     public void setReserved(String hexReserved) {
         byte[] reservedBytes = BaseEncoding.base16().decode(hexReserved);
+        System.arraycopy(reservedBytes, 0, dataPayload, RESERVED_INDEX, RESERVED_SIZE);
+    }
+
+    public void randomizeReserved() {
+        byte[] reservedBytes = new byte[RESERVED_SIZE];
+
+        // randomize reserved bytes
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(reservedBytes);
+
         System.arraycopy(reservedBytes, 0, dataPayload, RESERVED_INDEX, RESERVED_SIZE);
     }
 
@@ -135,8 +147,10 @@ public class BeaconCommand {
             encryptedDataPayload = encrypt(payloadToEncrypt, key, iv);
             Log.d(TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
 
-            Log.d(TAG, "decrypted: " +
-                    BaseEncoding.base16().lowerCase().decode(decrypt(encryptedDataPayload, key, iv)));
+            String decryptedPayload = decrypt(encryptedDataPayload, key, iv);
+            Log.d(TAG, "decrypted: counter: " + decryptedPayload.substring(0,16) +
+                    " command: " + decryptedPayload.substring(16,28) + " reserved: " +
+                    decryptedPayload.substring(28, 32));
         } catch (Exception e) {
             e.printStackTrace();
         }
