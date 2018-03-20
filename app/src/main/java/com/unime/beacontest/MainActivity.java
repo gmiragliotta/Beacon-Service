@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setParameters("00", "00");
                 beaconCommand.setUserId("0001");
                 beaconCommand.setObjectId("01", "02");
+                beaconCommand.randomizeReserved();
                 beaconCommand.setKey(key);
                 beaconCommand.setIv(iv);
 
