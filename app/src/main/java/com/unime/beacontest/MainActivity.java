@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.google.common.io.BaseEncoding;
+import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -88,21 +89,21 @@ public class MainActivity extends AppCompatActivity {
                 //String idObject = editIdObj.getText().toString();
                 //String idUser = editIdUser.getText().toString();
                 //String command = "0123456789";
-                Long counter = 255L;
+                String counter = "255";
                 //String idObject = "1234";
                 //String idUser = "7689";
 
 
                 BeaconCommand beaconCommand = new BeaconCommand();
                 beaconCommand.setBitmap((byte)0b11111111); // it works!
-                beaconCommand.setCounter(counter);
+                beaconCommand.setCounter(UnsignedLong.valueOf(counter));
                 beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
                 beaconCommand.setCommandClass("01");
                 beaconCommand.setCommandOpCode("00");
                 beaconCommand.setParameters("00", "00");
                 beaconCommand.setUserId("0001");
                 beaconCommand.setObjectId("01", "02");
-                beaconCommand.randomizeReserved();
+                // beaconCommand.randomizeReserved();
                 beaconCommand.setKey(key);
                 beaconCommand.setIv(iv);
 

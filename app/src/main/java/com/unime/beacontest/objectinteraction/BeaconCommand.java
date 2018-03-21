@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
+import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.beacon.Settings;
 
 import org.altbeacon.beacon.Beacon;
@@ -68,7 +69,7 @@ public class BeaconCommand {
     private byte[] key;
     private byte[] iv;
 
-
+    // TODO refactor this class
     public BeaconCommand() {
         zeroInit(getDataPayload());
     }
@@ -77,8 +78,8 @@ public class BeaconCommand {
         return dataPayload;
     }
 
-    public void setCounter(Long counter) {
-        byte[] counterBytes = Longs.toByteArray(counter);
+    public void setCounter(UnsignedLong counter) {
+        byte[] counterBytes = Longs.toByteArray(counter.longValue()); //TODO verify if it works
 
         System.arraycopy(counterBytes, 0, dataPayload, COUNTER_INDEX, COUNTER_SIZE);
     }
@@ -156,7 +157,7 @@ public class BeaconCommand {
         }
 
         return new Beacon.Builder()
-                .setId1(findUUID(encryptedDataPayload))
+                .setId1(BaseEncoding.base16().encode(encryptedDataPayload))
                 .setId2(findMajor(dataPayload))
                 .setId3(findMinor(dataPayload))
                 .setManufacturer(Settings.MANUFACTURER_ID)
@@ -165,20 +166,6 @@ public class BeaconCommand {
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
 
-    }
-
-
-    private String findUUID(final byte[] data){
-        StringBuilder sb = new StringBuilder();
-        for(int i = COUNTER_INDEX, offset = 0; i <= ENCRYPTED_DATA_PAYLOAD_SIZE-1; ++i, ++offset) {
-
-            sb.append(String.format("%02x", (int)(data[i] & 0xff)));
-            if (offset == 3 || offset == 5 || offset == 7 || offset == 9) {
-                sb.append("-");
-            }
-        }
-        Log.d(TAG, "hex: "+sb.toString());
-        return sb.toString();
     }
 
     private String findMajor(final byte[] data){
