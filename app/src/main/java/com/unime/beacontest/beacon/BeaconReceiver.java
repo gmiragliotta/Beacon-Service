@@ -28,7 +28,7 @@ public class BeaconReceiver {
     private Context context;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothAdapter mBluetoothAdapter;
-    private ScanCallback callback = getScanCallback();
+    private ScanCallback callback;
     private ScanSettings settings;
     private List<ScanFilter> filters;
     private boolean wasDetected = false;
@@ -46,12 +46,14 @@ public class BeaconReceiver {
         return context;
     }
 
+
     // start scanning and return a BeaconResults instance
     public BeaconResults startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration * 1000;
         settings = getScanSettings();
         filters = getScanFilters(customFilter);
+        callback = getScanCallback();
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
         return beaconResults;

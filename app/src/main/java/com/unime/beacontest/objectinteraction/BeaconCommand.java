@@ -37,14 +37,14 @@ public class BeaconCommand {
     private static final int USER_ID_SIZE = 2;
     private static final int OBJECT_ID_SIZE = 2;
 
-    private static final int DATA_PAYLOAD_SIZE = 20;
+    private static final int DATA_PAYLOAD_SIZE = 16;
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
 
     private static final int COUNTER_INDEX = 0;
     private static final int COMMAND_INDEX = COUNTER_INDEX + COUNTER_SIZE;
     private static final int RESERVED_INDEX = COMMAND_INDEX + COMMAND_SIZE;
-    private static final int USER_ID_INDEX = RESERVED_INDEX + RESERVED_SIZE;
-    private static final int OBJECT_ID_INDEX = USER_ID_INDEX + USER_ID_SIZE;
+    private static final int USER_ID_INDEX = 0;
+    private static final int OBJECT_ID_INDEX = 0;
 
     // Command components offsets
     private static final int COMMAND_TYPE_OFFSET = COMMAND_INDEX;
@@ -53,25 +53,15 @@ public class BeaconCommand {
     private static final int PARAMETERS_OFFSET = COMMAND_OP_CODE_OFFSET + 1;
     private static final int BITMAP_OFFSET = PARAMETERS_OFFSET + 2;
 
-    private byte[] counter; // long
-    private byte[] command; // hex
-    // 2 byte are free
-    private byte[] reserved = new byte[RESERVED_SIZE]; // random?
-    private byte[] userId; // hex
-    private byte[] objectId; // hex
-
     private byte[] dataPayload = new byte[DATA_PAYLOAD_SIZE];
     private byte[] encryptedDataPayload = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
-
-    private Beacon beacon;
-
-    // todo remove this initialization after test
-    private byte[] key;
-    private byte[] iv;
+    private byte[] userId = new byte[USER_ID_SIZE]; // hex
+    private byte[] objectId = new byte [OBJECT_ID_SIZE]; // hex
 
     // TODO refactor this class
     public BeaconCommand() {
-        zeroInit(getDataPayload());
+        zeros(getDataPayload());
+        ones(getDataPayload(), BITMAP_OFFSET, 1);
     }
 
     public byte[] getDataPayload() {
@@ -131,24 +121,17 @@ public class BeaconCommand {
         dataPayload[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
     }
 
-    public void setKey(byte[] key) {
-        this.key = key;
-    }
-
-    public void setIv(byte[] iv) {
-        this.iv = iv;
-    }
-
     public Beacon build() {
-        // Encrypt Payload Data (first 16 Bytes)
+        // Encrypt Payload Data (16 Bytes)
         byte[] payloadToEncrypt = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
         System.arraycopy(dataPayload, 0, payloadToEncrypt, 0, ENCRYPTED_DATA_PAYLOAD_SIZE);
 
         try {
-            encryptedDataPayload = encrypt(payloadToEncrypt, key, iv);
+            encryptedDataPayload = encrypt(payloadToEncrypt, Settings.key, Settings.iv);
             Log.d(TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
 
-            String decryptedPayload = decrypt(encryptedDataPayload, key, iv);
+            // Just for debugging purposes
+            String decryptedPayload = decrypt(encryptedDataPayload, Settings.key, Settings.iv);
             Log.d(TAG, "decrypted: counter: " + decryptedPayload.substring(0,16) +
                     " command: " + decryptedPayload.substring(16,28) + " reserved: " +
                     decryptedPayload.substring(28, 32));
@@ -158,33 +141,25 @@ public class BeaconCommand {
 
         return new Beacon.Builder()
                 .setId1(BaseEncoding.base16().encode(encryptedDataPayload))
-                .setId2(findMajor(dataPayload))
-                .setId3(findMinor(dataPayload))
+                .setId2(BaseEncoding.base16().encode(userId))
+                .setId3(BaseEncoding.base16().encode(objectId))
                 .setManufacturer(Settings.MANUFACTURER_ID)
                 .setTxPower(Settings.TX_POWER)
                 .setRssi(Settings.RSSI)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
-
     }
 
-    private String findMajor(final byte[] data){
-
-        String major = String.format("%02x%02x", data[USER_ID_INDEX], data[USER_ID_INDEX + 1]);
-        return major;
-    }
-
-    private String findMinor(final byte[] data){
-
-        String minor = String.format("%02x%02x", data[OBJECT_ID_INDEX], data[OBJECT_ID_INDEX + 1]);
-        return minor;
-    }
-
-    private void zeroInit(byte[] data) {
+    private void zeros(byte[] data) {
         for(int i=0; i < data.length; i++) {
             data[i] = 0;
         }
     }
 
+    private void ones(byte[] data, int off, int len) {
+        for(int i = off, size = off + len; i < size; i++) {
+            data[i] = (byte) 0xFF;
+        }
+    }
 
 }

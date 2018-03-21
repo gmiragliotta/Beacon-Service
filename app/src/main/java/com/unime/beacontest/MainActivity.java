@@ -13,13 +13,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,8 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editIdObj;
     private EditText editIdUser;
 
-    private byte[] key = BaseEncoding.base16().lowerCase().decode("9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45");
-    private byte[] iv = BaseEncoding.base16().lowerCase().decode("efaa299f48510f04181eb53b42ff1c01");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                 BeaconCommand beaconCommand = new BeaconCommand();
-                beaconCommand.setBitmap((byte)0b11111111); // it works!
+                // beaconCommand.setBitmap((byte)0b11111111); // it works!
                 beaconCommand.setCounter(UnsignedLong.valueOf(counter));
                 beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
                 beaconCommand.setCommandClass("01");
@@ -104,19 +101,17 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setUserId("0001");
                 beaconCommand.setObjectId("01", "02");
                 // beaconCommand.randomizeReserved();
-                beaconCommand.setKey(key);
-                beaconCommand.setIv(iv);
 
                 mService.sending(beaconCommand.build(), 15000);
             } else {
                 CustomFilter.Builder builder = new CustomFilter.Builder();
-                builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
-                builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
-                builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
-                builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
+                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
+                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
+                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
+                //builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
                 //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
                 CustomFilter customFilter = builder.build();
-                beaconResults = mService.scanning(customFilter, -70, 3);
+                beaconResults = mService.scanning(customFilter, -70, 10);
             }
         }
     }
