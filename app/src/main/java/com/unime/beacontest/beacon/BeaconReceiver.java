@@ -50,7 +50,7 @@ public class BeaconReceiver {
     // start scanning and return a BeaconResults instance
     public BeaconResults startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
         this.signalThreshold = signalThreshold;
-        this.scanDuration = scanDuration * 1000;
+        this.scanDuration = scanDuration;
         settings = getScanSettings();
         filters = getScanFilters(customFilter);
         callback = getScanCallback();
@@ -63,6 +63,8 @@ public class BeaconReceiver {
         final ScanSettings.Builder builder = new ScanSettings.Builder();
         builder.setReportDelay(0);
         builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+        // TODO scansettings CALLBACK_TYPE_FIRST_MATCH = 2;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             builder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE);
         }
@@ -100,7 +102,7 @@ public class BeaconReceiver {
                                 if (BeaconModel.isBeacon(data)) {
                                     BluetoothDevice device = result.getDevice();
 
-                                    Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
+                                    //Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
                                     BeaconModel beaconDetected = new BeaconModel(
                                             BeaconModel.findUUID(data),
                                             BeaconModel.findMajor(data),

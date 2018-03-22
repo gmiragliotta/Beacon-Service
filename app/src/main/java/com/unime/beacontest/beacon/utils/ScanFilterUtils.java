@@ -8,7 +8,8 @@ import java.util.UUID;
 public class ScanFilterUtils {
     private static final String TAG = "ScanFilterUtils";
 
-    private static final int MANUFACTURER_ID = 280;
+    private static final int MANUFACTURER_ID = 34952;
+    //private static final int MANUFACTURER_ID = 76;
     public static final int MANUFACTURER_DATAMASK_OFFSET = 2;
     public static final int MANUFACTURER_DATAMASK_SIZE = 21 + MANUFACTURER_DATAMASK_OFFSET;
 

@@ -2,6 +2,7 @@ package com.unime.beacontest.beacon;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.le.AdvertiseSettings;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
@@ -32,6 +33,7 @@ public class BeaconService extends Service {
 
         beaconParser = new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
         beaconTransmitter = new BeaconTransmitter(getApplicationContext(), beaconParser);
+        beaconTransmitter.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 

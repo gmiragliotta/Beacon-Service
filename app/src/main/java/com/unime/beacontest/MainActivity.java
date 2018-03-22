@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 //builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
                 //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
                 CustomFilter customFilter = builder.build();
-                beaconResults = mService.scanning(customFilter, -70, 10);
+                beaconResults = mService.scanning(customFilter, -70, 5000);
             }
         }
     }
