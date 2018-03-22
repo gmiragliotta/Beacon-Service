@@ -1,9 +1,11 @@
 package com.unime.beacontest.beacon.utils;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BeaconResults {
+public class BeaconResults implements Serializable {
+    public static final String BEACON_RESULTS = "BeaconResults";
     private Set<BeaconModel> founded;
 
 
@@ -18,4 +20,5 @@ public class BeaconResults {
     public void addResults(BeaconModel beaconDetected) {
         founded.add(beaconDetected);
     }
+
 }

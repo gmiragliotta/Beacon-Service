@@ -13,19 +13,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
-import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.objectinteraction.BeaconCommand;
+
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK_COMPLETE;
+import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
     BeaconService mService;
     boolean mBound = false;
-    private BeaconResults beaconResults;
 
     private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
     private IntentFilter mIntentFilter = new IntentFilter();
@@ -80,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if(buttonClickedId == R.id.btnSend) {
-
+                /*
                 //String command = editTextCommand.getText().toString();
                 //String counter = editTextCounter.getText().toString();
                 //String idObject = editIdObj.getText().toString();
@@ -111,7 +109,9 @@ public class MainActivity extends AppCompatActivity {
                 //builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
                 //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
                 CustomFilter customFilter = builder.build();
-                beaconResults = mService.scanning(customFilter, -70, 5000);
+                mService.scanning(customFilter, -70, 5000);
+            }
+            */
             }
         }
     }
@@ -137,14 +137,14 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public class BeaconBroadcastReceiver extends BroadcastReceiver {
-        public static final String ACTION_SCANNING_COMPLETE = "ActionScanningComplete";
         private static final String TAG = "BeaconBroadcastReceiver";
 
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
-            if(intent.getAction().equals(ACTION_SCANNING_COMPLETE)) {
-                Log.d(TAG, "onReceive: " + beaconResults.getResults());
+            if(intent.getAction().equals(ACTION_SCAN_ACK_COMPLETE)) {
+                Log.d(TAG, "onReceive: " + intent.getSerializableExtra(BEACON_RESULTS));
+                verifyAck();
             }
 
         }

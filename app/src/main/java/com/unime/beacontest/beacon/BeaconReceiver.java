@@ -22,6 +22,9 @@ import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_COMPLETE;
+import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
 
@@ -33,13 +36,15 @@ public class BeaconReceiver {
     private List<ScanFilter> filters;
     private boolean wasDetected = false;
     private int signalThreshold;
-    private  int scanDuration;
+    private int scanDuration;
+    private String action;     // Purpose of this scan
 
     private BeaconResults beaconResults = new BeaconResults();
 
     public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter) {
         this.context = context;
         this.mBluetoothAdapter = mBluetoothAdapter;
+        this.action = ACTION_SCAN_COMPLETE;
     }
 
     public Context getContext() {
@@ -47,8 +52,16 @@ public class BeaconReceiver {
     }
 
 
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
     // start scanning and return a BeaconResults instance
-    public BeaconResults startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
+    public void startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration;
         settings = getScanSettings();
@@ -56,7 +69,6 @@ public class BeaconReceiver {
         callback = getScanCallback();
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
         mBluetoothLeScanner.startScan(filters, settings, callback);
-        return beaconResults;
     }
 
     private static ScanSettings getScanSettings() {
@@ -84,7 +96,8 @@ public class BeaconReceiver {
 
             // broadcast ActionScanningComplete message
             Intent intent = new Intent();
-            intent.setAction("ActionScanningComplete");
+            intent.setAction(getAction());
+            intent.putExtra(BEACON_RESULTS, beaconResults);
             getContext().sendBroadcast(intent);
         }, scanDuration);
 
