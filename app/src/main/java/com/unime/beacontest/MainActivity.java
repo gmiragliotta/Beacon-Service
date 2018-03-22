@@ -16,13 +16,10 @@ import android.widget.EditText;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.Settings;
-import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
-import static com.unime.beacontest.objectinteraction.SmartObjectInteraction.verifyAck;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -38,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editIdObj;
     private EditText editIdUser;
 
+    SmartObjectInteraction prova;
 
 
     @Override
@@ -125,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setCommandOpCode("00");
                 beaconCommand.setParameters("00", "00");
                 beaconCommand.setUserId("0001");
-                beaconCommand.setObjectId("00", "08");
+                beaconCommand.setObjectId("00", "00");
 
                 SmartObjectInteraction prova = new SmartObjectInteraction(mService);
                 prova.setBeaconCommand(beaconCommand);
@@ -160,10 +158,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
+            Log.d(TAG, "onReceive: start");
             if(intent.getAction().equals(ACTION_SCAN_ACK)) {
-                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+                //BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 Log.d(TAG, "onReceive: " + ACTION_SCAN_ACK);
-                verifyAck(beaconResults);
+                //prova.verifyAck(beaconResults);
             }
 
         }

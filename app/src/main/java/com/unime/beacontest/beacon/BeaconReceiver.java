@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
@@ -15,15 +14,10 @@ import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.beacon.utils.ConversionUtils;
 import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.beacon.utils.ScanFilterUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_COMPLETE;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.beacon.utils.ScanFilterUtils.toFilter;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
@@ -33,7 +27,6 @@ public class BeaconReceiver {
     private BluetoothAdapter mBluetoothAdapter;
     private ScanCallback callback;
     private ScanSettings settings;
-    private List<ScanFilter> filters;
     private boolean wasDetected = false;
     private int signalThreshold;
     private int scanDuration;
@@ -65,10 +58,9 @@ public class BeaconReceiver {
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration;
         settings = getScanSettings();
-        filters = getScanFilters(customFilter);
         callback = getScanCallback();
         mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
-        mBluetoothLeScanner.startScan(filters, settings, callback);
+        mBluetoothLeScanner.startScan(null, settings, callback);
     }
 
     private static ScanSettings getScanSettings() {
@@ -96,8 +88,9 @@ public class BeaconReceiver {
 
             // broadcast ActionScanningComplete message
             Intent intent = new Intent();
+            Log.d(TAG, "getScanCallback: action " + getAction());
             intent.setAction(getAction());
-            intent.putExtra(BEACON_RESULTS, beaconResults);
+            //intent.putExtra(BEACON_RESULTS, beaconResults);
             getContext().sendBroadcast(intent);
         }, scanDuration);
 
@@ -110,9 +103,11 @@ public class BeaconReceiver {
                     scanHandler.post(
                             () -> {
                                 byte[] data = result.getScanRecord().getBytes();
-                                Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
 
-                                if (BeaconModel.isBeacon(data)) {
+
+                                //Log.d(TAG, "run: " + ConversionUtils.byteToHex(data) + data.length);
+
+                                if (toFilter(data)) {
 
                                     BluetoothDevice device = result.getDevice();
 
@@ -142,13 +137,5 @@ public class BeaconReceiver {
                 }
             }
         };
-    }
-
-    private static List<ScanFilter> getScanFilters(CustomFilter customFilter) {
-        List<ScanFilter> filters = new ArrayList<>();
-
-        filters.add(ScanFilterUtils.getScanFilter(customFilter));
-
-        return filters;
     }
 }

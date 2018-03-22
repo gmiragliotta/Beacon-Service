@@ -58,10 +58,10 @@ public class BeaconService extends Service {
         return mBinder;
     }
 
-    public void scanning (CustomFilter customFilter, int signalThreshold, int scanDuration, String purpose) {
+    public void scanning (CustomFilter customFilter, int signalThreshold, int scanDuration, String action) {
         if(PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
             BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter);
-            mBeaconReceiver.setAction(purpose);
+            mBeaconReceiver.setAction(action);
             mBeaconReceiver.startScanning(customFilter, signalThreshold, scanDuration);
         }
     }

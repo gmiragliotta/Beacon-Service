@@ -23,8 +23,8 @@ public class BeaconModel implements Serializable {
     // ID of the beacon, in case of Android it will be Bluetooth MAC address
     private String address;
 
-    //private static final int PROTOCOL_OFFSET = 3;
-    private static final int PROTOCOL_OFFSET = 0;
+    private static final int PROTOCOL_OFFSET = 3;
+    //private static final int PROTOCOL_OFFSET = 0;
     private static final int AD_LENGTH_INDEX = 0 + PROTOCOL_OFFSET;
     private static final int AD_TYPE_INDEX = 1 + PROTOCOL_OFFSET;
     private static final int BEACON_CODE_INDEX = 4 + PROTOCOL_OFFSET;
@@ -110,7 +110,7 @@ public class BeaconModel implements Serializable {
         this.timestamp = timestamp;
     }
 
-    public static boolean isBeacon(final byte[] data) {
+    public static boolean isAltBeacon(final byte[] data) {
         if ((data[AD_LENGTH_INDEX] & 0xff) != AD_LENGTH_VALUE)
             return false;
         if ((data[AD_TYPE_INDEX] & 0xff) != AD_TYPE_VALUE)

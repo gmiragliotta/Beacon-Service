@@ -115,6 +115,8 @@ public class BeaconCommand {
         userId = BaseEncoding.base16().decode(hexUserId);
     }
 
+
+
     public void setObjectId(String hexCategory, String hexObjectId) {
         objectId[OBJECT_ID_INDEX] = BaseEncoding.base16().decode(hexCategory)[0];
         objectId[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
