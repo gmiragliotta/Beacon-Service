@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
 
 import org.altbeacon.beacon.Beacon;
@@ -59,12 +58,12 @@ public class BeaconService extends Service {
         return mBinder;
     }
 
-    public BeaconResults scanning (CustomFilter customFilter, int signalThreshold, int scanDuration) {
+    public void scanning (CustomFilter customFilter, int signalThreshold, int scanDuration, String purpose) {
         if(PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
             BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter);
-            return mBeaconReceiver.startScanning(customFilter, signalThreshold, scanDuration);
+            mBeaconReceiver.setAction(purpose);
+            mBeaconReceiver.startScanning(customFilter, signalThreshold, scanDuration);
         }
-        return null;
     }
 
     public void sending (Beacon beacon, long delayMillis) {

@@ -15,9 +15,13 @@ import android.widget.EditText;
 
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
+import com.unime.beacontest.beacon.Settings;
+import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.beacontest.objectinteraction.BeaconCommand;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK_COMPLETE;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.objectinteraction.SmartObjectInteraction.verifyAck;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -112,6 +116,15 @@ public class MainActivity extends AppCompatActivity {
                 mService.scanning(customFilter, -70, 5000);
             }
             */
+                BeaconCommand beaconCommand = new BeaconCommand();
+                // beaconCommand.setBitmap((byte)0b11111111); // it works!
+                beaconCommand.setCounter(Settings.counter);
+                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
+                beaconCommand.setCommandClass("01");
+                beaconCommand.setCommandOpCode("00");
+                beaconCommand.setParameters("00", "00");
+                beaconCommand.setUserId("0001");
+                beaconCommand.setObjectId("01", "02");
             }
         }
     }
@@ -142,9 +155,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
-            if(intent.getAction().equals(ACTION_SCAN_ACK_COMPLETE)) {
-                Log.d(TAG, "onReceive: " + intent.getSerializableExtra(BEACON_RESULTS));
-                verifyAck();
+            if(intent.getAction().equals(ACTION_SCAN_ACK)) {
+                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+                Log.d(TAG, "onReceive: " + ACTION_SCAN_ACK);
+                verifyAck(beaconResults);
             }
 
         }

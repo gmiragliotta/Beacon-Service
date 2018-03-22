@@ -115,7 +115,7 @@ public class BeaconReceiver {
                                 if (BeaconModel.isBeacon(data)) {
                                     BluetoothDevice device = result.getDevice();
 
-                                    //Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
+                                    //Log.d(BEACON_COMMAND_TAG, "run: " + ConversionUtils.byteToHex(data));
                                     BeaconModel beaconDetected = new BeaconModel(
                                             BeaconModel.findUUID(data),
                                             BeaconModel.findMajor(data),
@@ -134,7 +134,7 @@ public class BeaconReceiver {
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
-                                    //Log.d(TAG, "run: " + ++numberOfBeaconDetected);
+                                    //Log.d(BEACON_COMMAND_TAG, "run: " + ++numberOfBeaconDetected);
                                     wasDetected = true;
                                 }
                             });

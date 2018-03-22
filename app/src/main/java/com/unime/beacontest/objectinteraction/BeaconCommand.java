@@ -29,7 +29,7 @@ import static com.unime.beacontest.AES256.encrypt;
  */
 
 public class BeaconCommand {
-    public static final String TAG = "BeaconCommand";
+    public static final String BEACON_COMMAND_TAG = "BeaconCommand";
 
     private static final int COUNTER_SIZE = 8;
     private static final int COMMAND_SIZE = 6;
@@ -121,6 +121,10 @@ public class BeaconCommand {
         dataPayload[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
     }
 
+    public String getObjectId() {
+        return BaseEncoding.base16().lowerCase().encode(objectId);
+    }
+
     public Beacon build() {
         // Encrypt Payload Data (16 Bytes)
         byte[] payloadToEncrypt = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
@@ -128,11 +132,11 @@ public class BeaconCommand {
 
         try {
             encryptedDataPayload = encrypt(payloadToEncrypt, Settings.key, Settings.iv);
-            Log.d(TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
+            Log.d(BEACON_COMMAND_TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
 
             // Just for debugging purposes
             String decryptedPayload = decrypt(encryptedDataPayload, Settings.key, Settings.iv);
-            Log.d(TAG, "decrypted: counter: " + decryptedPayload.substring(0,16) +
+            Log.d(BEACON_COMMAND_TAG, "decrypted: counter: " + decryptedPayload.substring(0,16) +
                     " command: " + decryptedPayload.substring(16,28) + " reserved: " +
                     decryptedPayload.substring(28, 32));
         } catch (Exception e) {
