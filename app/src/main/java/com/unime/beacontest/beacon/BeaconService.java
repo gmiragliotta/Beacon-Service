@@ -79,7 +79,7 @@ public class BeaconService extends Service {
             Handler mCanceller = new Handler();
             mCanceller.postDelayed(() -> {
                 beaconTransmitter.stopAdvertising(); // todo place a control isStarted
-                Log.d(TAG, "Advertisement stopped after " + (delayMillis / 1000) + " seconds");
+                Log.d(TAG, "Advertisement stopped after " + delayMillis + " ms");
                 }, delayMillis);
         }
     }

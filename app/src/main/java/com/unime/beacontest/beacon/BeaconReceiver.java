@@ -89,9 +89,9 @@ public class BeaconReceiver {
 
         mCanceller.postDelayed(() -> {
             if (!wasDetected) {
-                Log.d(TAG, "No beacon detected after " + scanDuration / 1000 + " seconds: stopScanning");
+                Log.d(TAG, "No beacon detected after " + scanDuration  + " ms: stopScanning");
             }
-            Log.d(TAG, "Stop scanning after " + scanDuration / 1000 + " seconds");
+            Log.d(TAG, "Stop scanning after " + scanDuration  + " ms");
             mBluetoothLeScanner.stopScan(callback);
 
             // broadcast ActionScanningComplete message
@@ -113,6 +113,7 @@ public class BeaconReceiver {
                                 Log.d(TAG, "run: " + ConversionUtils.byteToHex(data));
 
                                 if (BeaconModel.isBeacon(data)) {
+
                                     BluetoothDevice device = result.getDevice();
 
                                     //Log.d(BEACON_COMMAND_TAG, "run: " + ConversionUtils.byteToHex(data));

@@ -112,16 +112,16 @@ public class BeaconCommand {
     }
 
     public void setUserId(String hexUserId) {
-        byte[] userIdBytes = BaseEncoding.base16().decode(hexUserId);
-        System.arraycopy(userIdBytes, 0, dataPayload, USER_ID_INDEX, USER_ID_SIZE);
+        userId = BaseEncoding.base16().decode(hexUserId);
     }
 
     public void setObjectId(String hexCategory, String hexObjectId) {
-        dataPayload[OBJECT_ID_INDEX] = BaseEncoding.base16().decode(hexCategory)[0];
-        dataPayload[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
+        objectId[OBJECT_ID_INDEX] = BaseEncoding.base16().decode(hexCategory)[0];
+        objectId[OBJECT_ID_INDEX + 1] = BaseEncoding.base16().decode(hexObjectId)[0];
     }
 
     public String getObjectId() {
+        Log.d(BEACON_COMMAND_TAG, "getObjectId: " + BaseEncoding.base16().lowerCase().encode(objectId));
         return BaseEncoding.base16().lowerCase().encode(objectId);
     }
 

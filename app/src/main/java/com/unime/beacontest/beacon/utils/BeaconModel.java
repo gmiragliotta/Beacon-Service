@@ -1,7 +1,5 @@
 package com.unime.beacontest.beacon.utils;
 
-import android.util.Log;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -131,7 +129,7 @@ public class BeaconModel implements Serializable {
                 sb.append("-");
             }
         }
-        Log.d(TAG, "findUUID: "+sb.toString());
+        // Log.d(TAG, "findUUID: "+sb.toString());
         return sb.toString();
     }
 

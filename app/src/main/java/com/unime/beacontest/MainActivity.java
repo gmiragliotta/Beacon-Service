@@ -18,6 +18,7 @@ import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.Settings;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
+import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
@@ -124,7 +125,11 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setCommandOpCode("00");
                 beaconCommand.setParameters("00", "00");
                 beaconCommand.setUserId("0001");
-                beaconCommand.setObjectId("01", "02");
+                beaconCommand.setObjectId("00", "08");
+
+                SmartObjectInteraction prova = new SmartObjectInteraction(mService);
+                prova.setBeaconCommand(beaconCommand);
+                prova.interact();
             }
         }
     }

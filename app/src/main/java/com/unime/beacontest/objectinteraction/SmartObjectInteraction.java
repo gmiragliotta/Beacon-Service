@@ -7,7 +7,6 @@ import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.Settings;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.CustomFilter;
-import com.unime.beacontest.beacon.utils.Filter;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 
@@ -19,7 +18,7 @@ public class SmartObjectInteraction {
     private static final String SMART_OBJECT_INTERACTION_TAG = "SmartObjectInteraction";
     private static final int SENDING_DURATION_MILLIS = 300;
     private static final int SENDING_DELAY = 0;
-    private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS;
+    private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS + 4000;
     private static final int SCANNING_DELAY_MILLIS = 100;
 
     private BeaconCommand beaconCommand;
@@ -36,7 +35,7 @@ public class SmartObjectInteraction {
     private CustomFilter AckFilter() {
         CustomFilter.Builder builder = new CustomFilter.Builder();
         Log.d(SMART_OBJECT_INTERACTION_TAG, "AckFilter: " + beaconCommand.getObjectId());
-        builder.addFilter(new Filter(Filter.MINOR_TYPE, beaconCommand.getObjectId(), 0, 1));
+        //builder.addFilter(new Filter(Filter.MINOR_TYPE, beaconCommand.getObjectId(), 0, 1));
         return builder.build();
     }
 
