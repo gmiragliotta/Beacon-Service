@@ -28,9 +28,18 @@ public class SmartObjectInteraction {
 
     private BeaconCommand beaconCommand;
     private BeaconService beaconService;
+    private int retryCounter = 0;
 
     public SmartObjectInteraction(BeaconService beaconService) {
         this.beaconService = beaconService;
+    }
+
+    public void incRetryCounter() {
+        retryCounter++;
+    }
+
+    public int getRetryCounter() {
+        return retryCounter;
     }
 
     public void setBeaconCommand(BeaconCommand beaconCommand) {

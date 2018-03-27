@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
+import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.AES256;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -98,7 +99,8 @@ public class BeaconService extends Service {
 
         mHandler.postDelayed(() -> {
             boolean ackFounded = false;
-            int counter = 0;
+
+            UnsignedLong counter = Settings.counter;
 
             for(BeaconModel beaconModel : beaconResults.getResults()) {
                 try {
@@ -106,8 +108,13 @@ public class BeaconService extends Service {
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
                     //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck: " + clear);
                     //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck2: " + clear.substring(16, 26));
-                    if(clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID)){ // TODO IL COUNTER
+                    if(clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID) &&
+                            clear.substring(0,16).equals(
+                                    counter.plus(UnsignedLong.valueOf(1)).toString()
+                            )) {
                         Log.d("", "verifyAck: ok");
+                        Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
+                        Log.d("", "New counter value" + Settings.counter.toString());
                         ackFounded = true;
                     }
                 } catch (Exception e) {
@@ -115,9 +122,9 @@ public class BeaconService extends Service {
                 }
             }
 
-            if(!ackFounded && counter < SmartObjectInteraction.MAX_ACK_RETRY) {
+            if(!ackFounded && (mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
                 Log.d(BEACON_SERVICE_TAG, "verifyAck: Not Founded");
-                ++counter;
+                mSmartObjectInteraction.incRetryCounter();
                 mSmartObjectInteraction.interact();
             }
         }, 0);
