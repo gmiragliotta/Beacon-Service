@@ -9,14 +9,21 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.unime.beacontest.beacon.utils.CustomFilter;
+import com.google.common.io.BaseEncoding;
+import com.unime.beacontest.AES256;
+import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.beacontest.beacon.utils.Filter;
+import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.BeaconTransmitter;
 
+import static com.unime.beacontest.objectinteraction.SmartObjectInteraction.ACK_VALUE;
+
 public class BeaconService extends Service {
-    public static final String TAG = "ReceiverService";
+    public static final String BEACON_SERVICE_TAG = "BeaconService";
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -58,11 +65,11 @@ public class BeaconService extends Service {
         return mBinder;
     }
 
-    public void scanning (CustomFilter customFilter, int signalThreshold, int scanDuration, String action) {
+    public void scanning (Filter filter, int signalThreshold, int scanDuration, String action) {
         if(PermissionsChecker.checkBluetoothPermission(getApplicationContext(), mBluetoothAdapter)) {
-            BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter);
+            BeaconReceiver mBeaconReceiver = new BeaconReceiver(this, mBluetoothAdapter, filter);
             mBeaconReceiver.setAction(action);
-            mBeaconReceiver.startScanning(customFilter, signalThreshold, scanDuration);
+            mBeaconReceiver.startScanning(signalThreshold, scanDuration);
         }
     }
 
@@ -78,9 +85,41 @@ public class BeaconService extends Service {
             // stop advertising after  delayMillis
             Handler mCanceller = new Handler();
             mCanceller.postDelayed(() -> {
-                beaconTransmitter.stopAdvertising(); // todo place a control isStarted
-                Log.d(TAG, "Advertisement stopped after " + delayMillis + " ms");
+                beaconTransmitter.stopAdvertising();
+                Log.d(BEACON_SERVICE_TAG, "Advertisement stopped after " + delayMillis + " ms");
                 }, delayMillis);
         }
+    }
+
+    public void verifyAck(BeaconResults beaconResults, SmartObjectInteraction mSmartObjectInteraction) {
+        //TODO async
+
+        Handler mHandler = new Handler();
+
+        mHandler.postDelayed(() -> {
+            boolean ackFounded = false;
+            int counter = 0;
+
+            for(BeaconModel beaconModel : beaconResults.getResults()) {
+                try {
+                    String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
+                            beaconModel.getClearUuid()), Settings.key, Settings.iv);
+                    //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck: " + clear);
+                    //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck2: " + clear.substring(16, 26));
+                    if(clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID)){ // TODO IL COUNTER
+                        Log.d("", "verifyAck: ok");
+                        ackFounded = true;
+                    }
+                } catch (Exception e) {
+                    Log.e(BEACON_SERVICE_TAG, "verifyAck: " + e.getMessage());
+                }
+            }
+
+            if(!ackFounded && counter < SmartObjectInteraction.MAX_ACK_RETRY) {
+                Log.d(BEACON_SERVICE_TAG, "verifyAck: Not Founded");
+                ++counter;
+                mSmartObjectInteraction.interact();
+            }
+        }, 0);
     }
 }

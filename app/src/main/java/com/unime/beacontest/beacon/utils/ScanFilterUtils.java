@@ -1,14 +1,11 @@
 package com.unime.beacontest.beacon.utils;
 
-import android.util.Log;
-
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.beacon.Settings;
 
 import java.math.BigInteger;
 
 public class ScanFilterUtils {
-    private static final String TAG = "ScanFilterUtils";
+    private static final String SCAN_FILTER_UTILS_TAG = "ScanFilterUtils";
 
     private static final int MANUFACTURER_ID_INDEX = 5;
     private static final int MANUFACTURER_ID_SIZE = 2;
@@ -16,7 +13,7 @@ public class ScanFilterUtils {
     //private static final int MANUFACTURER_ID = 34952; // custom
     //private static final int MANUFACTURER_ID = 76; // apple
     //private static final int MANUFACTURER_ID = 280; // radius network
-    private static final int MANUFACTURER_ID = 280;
+    //private static final int MANUFACTURER_ID = 280;
 
     public static final int MANUFACTURER_DATAMASK_OFFSET = 2;
     public static final int MANUFACTURER_DATAMASK_SIZE = 21 + MANUFACTURER_DATAMASK_OFFSET;
@@ -30,21 +27,4 @@ public class ScanFilterUtils {
         System.arraycopy(data, MANUFACTURER_ID_INDEX, manufacturerIdBytes, 0, MANUFACTURER_ID_SIZE);
         return new BigInteger(BaseEncoding.base16().encode(manufacturerIdBytes),16).intValue();
     }
-
-
-    public static boolean toFilter(byte[] data) {
-        //Log.d(TAG, "toFilter: " + BaseEncoding.base16().lowerCase().encode(data));
-        //Log.d(TAG, "toFilter: minor " +  BeaconModel.findMinor(data));
-
-        String hexData = BaseEncoding.base16().encode(data);
-        int manufacturerId = ScanFilterUtils.getManufacturerId(data);
-
-        if(BeaconModel.isAltBeacon(data) && (manufacturerId == Settings.MANUFACTURER_ID) &&
-                BeaconModel.findMinor(data).equals("0000")) {
-            Log.d(TAG, "toFilter: " + BaseEncoding.base16().lowerCase().encode(data));
-            return true;
-        }
-        return false;
-    }
-
 }

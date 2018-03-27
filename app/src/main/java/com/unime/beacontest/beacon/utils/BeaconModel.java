@@ -133,6 +133,16 @@ public class BeaconModel implements Serializable {
         return sb.toString();
     }
 
+    public String getClearUuid() {
+        StringBuilder sb = new StringBuilder(getUuid());
+        sb.deleteCharAt(8);
+        sb.deleteCharAt(12);
+        sb.deleteCharAt(16);
+        sb.deleteCharAt(20);
+        //Log.d(TAG, "getClearUuid: " + sb.toString());
+        return sb.toString();
+    }
+
     public static String findMajor(final byte[] data){
 
         String major = String.format("%02x%02x", data[ARGS_START_INDEX], data[ARGS_START_INDEX + 1]);

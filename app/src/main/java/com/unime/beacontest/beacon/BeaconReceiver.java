@@ -14,15 +14,16 @@ import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.beacon.utils.CustomFilter;
+import com.unime.beacontest.beacon.utils.Filter;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_COMPLETE;
-import static com.unime.beacontest.beacon.utils.ScanFilterUtils.toFilter;
+import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";
 
     private Context context;
+    private Filter filter;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothAdapter mBluetoothAdapter;
     private ScanCallback callback;
@@ -34,10 +35,11 @@ public class BeaconReceiver {
 
     private BeaconResults beaconResults = new BeaconResults();
 
-    public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter) {
+    public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter, Filter filter) {
         this.context = context;
         this.mBluetoothAdapter = mBluetoothAdapter;
         this.action = ACTION_SCAN_COMPLETE;
+        this.filter = filter;
     }
 
     public Context getContext() {
@@ -54,7 +56,7 @@ public class BeaconReceiver {
     }
 
     // start scanning and return a BeaconResults instance
-    public void startScanning(CustomFilter customFilter, int signalThreshold, int scanDuration) {
+    public void startScanning(int signalThreshold, int scanDuration) { // todo qui
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration;
         settings = getScanSettings();
@@ -88,9 +90,10 @@ public class BeaconReceiver {
 
             // broadcast ActionScanningComplete message
             Intent intent = new Intent();
-            Log.d(TAG, "getScanCallback: action " + getAction());
+
             intent.setAction(getAction());
-            //intent.putExtra(BEACON_RESULTS, beaconResults);
+            Log.d(TAG, "getScanCallback: " + beaconResults);
+            intent.putExtra(BEACON_RESULTS, beaconResults);
             getContext().sendBroadcast(intent);
         }, scanDuration);
 
@@ -104,38 +107,44 @@ public class BeaconReceiver {
                             () -> {
                                 byte[] data = result.getScanRecord().getBytes();
 
-
                                 //Log.d(TAG, "run: " + ConversionUtils.byteToHex(data) + data.length);
-
-                                if (toFilter(data)) {
-
-                                    BluetoothDevice device = result.getDevice();
-
-                                    //Log.d(BEACON_COMMAND_TAG, "run: " + ConversionUtils.byteToHex(data));
-                                    BeaconModel beaconDetected = new BeaconModel(
-                                            BeaconModel.findUUID(data),
-                                            BeaconModel.findMajor(data),
-                                            BeaconModel.findMinor(data),
-                                            BeaconModel.findTxPower(data), // API 26 required getTxPower method
-                                            result.getRssi(),
-                                            result.getTimestampNanos(),
-                                            device.getAddress()
-                                    );
-                                    beaconResults.addResults(beaconDetected);
-
-                                    try {
-                                        Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
-                                                " major: " + beaconDetected.getMajor() +
-                                                " minor: " + beaconDetected.getMinor() + "\n");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                                if(null != filter) {
+                                    if (filter.apply(data)) {
+                                        processResult(data, result);
+                                        //Log.d(BEACON_COMMAND_TAG, "run: " + ++numberOfBeaconDetected);
+                                        wasDetected = true;
                                     }
-                                    //Log.d(BEACON_COMMAND_TAG, "run: " + ++numberOfBeaconDetected);
-                                    wasDetected = true;
+                                } else { // No filter!
+                                    processResult(data, result);
                                 }
                             });
                 }
             }
         };
     }
+
+    private void processResult (final byte[] data, final ScanResult result) {
+        BluetoothDevice device = result.getDevice();
+
+        //Log.d(BEACON_COMMAND_TAG, "run: " + ConversionUtils.byteToHex(data));
+        BeaconModel beaconDetected = new BeaconModel(
+                BeaconModel.findUUID(data),
+                BeaconModel.findMajor(data),
+                BeaconModel.findMinor(data),
+                BeaconModel.findTxPower(data), // API 26 required getTxPower method
+                result.getRssi(),
+                result.getTimestampNanos(),
+                device.getAddress()
+        );
+        beaconResults.addResults(beaconDetected);
+
+        try {
+            Log.d(TAG, "uuid: " + beaconDetected.getUuid() +
+                    " major: " + beaconDetected.getMajor() +
+                    " minor: " + beaconDetected.getMinor() + "\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
