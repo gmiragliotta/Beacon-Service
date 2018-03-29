@@ -9,7 +9,7 @@ public class Settings {
     public static final int RSSI = -59;
     public static final int SIGNAL_THRESHOLD = -70;
     public static final String USER_ID = "0001";
-    public static UnsignedLong counter = UnsignedLong.valueOf("255");
+    public static UnsignedLong counter = UnsignedLong.valueOf("0");
     public static byte[] key = BaseEncoding.base16().lowerCase().decode("9bd9cdf6be2b9d58fbd2ef3ed83769a0caf56fd0acc3e052f07afab8dd013f45");
     public static byte[] iv = BaseEncoding.base16().lowerCase().decode("efaa299f48510f04181eb53b42ff1c01");
 }

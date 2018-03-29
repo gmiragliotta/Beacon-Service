@@ -18,11 +18,11 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 
 public class SmartObjectInteraction {
     private static final String SMART_OBJECT_INTERACTION_TAG = "SmartObjectInteraction";
-    private static final int SENDING_DURATION_MILLIS = 300 + 1700;
-    private static final int SENDING_DELAY = 0;
-    private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS + 0;
+    private static final int SENDING_DURATION_MILLIS = 300;
+    // private static final int SENDING_DELAY = 0;
+    private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS;
     private static final int SCANNING_DELAY_MILLIS = 100;
-    public static final int MAX_ACK_RETRY = 3; // TODO implement this
+    public static final int MAX_ACK_RETRY = 2;
     public static final String ACK_VALUE = "ffffff";
     private static final String SMART_OBJECT_ID = "0000";
 

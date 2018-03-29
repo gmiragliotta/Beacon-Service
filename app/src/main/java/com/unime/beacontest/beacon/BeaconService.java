@@ -106,15 +106,18 @@ public class BeaconService extends Service {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
-                    //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck: " + clear);
+                    Log.d(BEACON_SERVICE_TAG, "verifyAck clear: " + clear);
+                    //Log.d(BEACON_SERVICE_TAG, "verifyAck: first check -> " +
+                           // clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
                     //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck2: " + clear.substring(16, 26));
+                    Log.d(BEACON_SERVICE_TAG, "verifyAck second check -> " +
+                            UnsignedLong.valueOf(clear.substring(0,16)).equals(counter) + " " + counter.toString());
                     if(clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID) &&
-                            clear.substring(0,16).equals(
-                                    counter.plus(UnsignedLong.valueOf(1)).toString()
-                            )) {
-                        Log.d("", "verifyAck: ok");
+                            UnsignedLong.valueOf(clear.substring(0,16)).equals(counter)
+                            ) {
+                        Log.d(BEACON_SERVICE_TAG, "verifyAck: ok");
                         Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
-                        Log.d("", "New counter value" + Settings.counter.toString());
+                        Log.d("", "New counter value -> " + Settings.counter.toString());
                         ackFounded = true;
                     }
                 } catch (Exception e) {

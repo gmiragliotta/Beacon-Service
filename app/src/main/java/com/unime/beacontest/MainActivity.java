@@ -122,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
                 // beaconCommand.setBitmap((byte)0b11111111); // it works!
                 beaconCommand.setCounter(Settings.counter);
                 beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
-                beaconCommand.setCommandClass("01");
-                beaconCommand.setCommandOpCode("00");
+                beaconCommand.setCommandClass("00");
+                beaconCommand.setCommandOpCode("01");
                 beaconCommand.setParameters("00", "00");
                 beaconCommand.setUserId("0001");
                 beaconCommand.setObjectId("00", "00");
