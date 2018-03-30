@@ -111,13 +111,14 @@ public class BeaconService extends Service {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
+                    // Start Debug logs
                     Log.d(BEACON_SERVICE_TAG, "verifyAck clear: " + clear);
-
                     Log.d(BEACON_SERVICE_TAG, "verifyAck first check -> " +
                             UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
                                     .equals(counter.plus(UnsignedLong.valueOf(1))) + " " + counter.toString());
                     Log.d(BEACON_SERVICE_TAG, "verifyAck: second check -> " +
                             clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
+                    // End Debug logs
 
                     if(UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
                             .equals(counter.plus(UnsignedLong.valueOf(1))) &&

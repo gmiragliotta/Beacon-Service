@@ -20,6 +20,8 @@ import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 
+import java.util.Objects;
+
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
@@ -161,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
-            if(intent.getAction().equals(ACTION_SCAN_ACK)) {
+            if(Objects.equals(intent.getAction(), ACTION_SCAN_ACK)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
