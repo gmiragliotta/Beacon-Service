@@ -25,6 +25,11 @@ import static com.unime.beacontest.objectinteraction.SmartObjectInteraction.ACK_
 
 public class BeaconService extends Service {
     public static final String BEACON_SERVICE_TAG = "BeaconService";
+    private static final int COUNTER_INDEX_START = 0;
+    private static final int COUNTER_INDEX_END = 16; // excluded
+    private static final int COMMAND_INDEX_START = 16;
+    private static final int COMMAND_INDEX_END = 26;
+
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -107,17 +112,20 @@ public class BeaconService extends Service {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
                     Log.d(BEACON_SERVICE_TAG, "verifyAck clear: " + clear);
-                    //Log.d(BEACON_SERVICE_TAG, "verifyAck: first check -> " +
-                           // clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
-                    //Log.d(SMART_OBJECT_INTERACTION_TAG, "verifyAck2: " + clear.substring(16, 26));
-                    Log.d(BEACON_SERVICE_TAG, "verifyAck second check -> " +
-                            UnsignedLong.valueOf(clear.substring(0,16)).equals(counter) + " " + counter.toString());
-                    if(clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID) &&
-                            UnsignedLong.valueOf(clear.substring(0,16)).equals(counter)
+
+                    Log.d(BEACON_SERVICE_TAG, "verifyAck first check -> " +
+                            UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
+                                    .equals(counter.plus(UnsignedLong.valueOf(1))) + " " + counter.toString());
+                    Log.d(BEACON_SERVICE_TAG, "verifyAck: second check -> " +
+                            clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
+
+                    if(UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
+                            .equals(counter.plus(UnsignedLong.valueOf(1))) &&
+                            clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Settings.USER_ID)
                             ) {
                         Log.d(BEACON_SERVICE_TAG, "verifyAck: ok");
                         Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
-                        Log.d("", "New counter value -> " + Settings.counter.toString());
+                        Log.d(BEACON_SERVICE_TAG, "New counter value -> " + Settings.counter.toString());
                         ackFounded = true;
                     }
                 } catch (Exception e) {

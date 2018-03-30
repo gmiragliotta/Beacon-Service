@@ -29,7 +29,7 @@ import static com.unime.beacontest.AES256.encrypt;
  */
 
 public class BeaconCommand {
-    public static final String BEACON_COMMAND_TAG = "BeaconCommand";
+    private static final String BEACON_COMMAND_TAG = "BeaconCommand";
 
     private static final int COUNTER_SIZE = 8;
     private static final int COMMAND_SIZE = 6;
