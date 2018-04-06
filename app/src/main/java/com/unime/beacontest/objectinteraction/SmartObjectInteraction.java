@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.unime.beacontest.beacon.BeaconService;
-import com.unime.beacontest.beacon.Settings;
+import com.unime.beacontest.Settings;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;

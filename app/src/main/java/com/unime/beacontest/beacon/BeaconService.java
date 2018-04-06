@@ -12,9 +12,11 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.AES256;
+import com.unime.beacontest.Settings;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.Filter;
+import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 
 import org.altbeacon.beacon.Beacon;
@@ -111,6 +113,7 @@ public class BeaconService extends Service {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
+
                     // Start Debug logs
                     Log.d(BEACON_SERVICE_TAG, "verifyAck clear: " + clear);
                     Log.d(BEACON_SERVICE_TAG, "verifyAck first check -> " +
@@ -140,5 +143,22 @@ public class BeaconService extends Service {
                 mSmartObjectInteraction.interact();
             }
         }, 0);
+    }
+
+    public void sendAck(String hexObjectId){
+        // Start building the ack command
+        BeaconCommand beaconCommand = new BeaconCommand();
+        beaconCommand.setCounter(Settings.counter); // TODO counter or counter +1?
+        beaconCommand.setCommandType("FF");
+        beaconCommand.setCommandClass("FF");
+        beaconCommand.setCommandOpCode("FF");
+        beaconCommand.setUserId(Settings.USER_ID);
+        beaconCommand.setObjectId(
+                hexObjectId.substring(0,2),
+                hexObjectId.substring(2, 4)
+        );
+
+        sending(beaconCommand.build(), 0);
+
     }
 }

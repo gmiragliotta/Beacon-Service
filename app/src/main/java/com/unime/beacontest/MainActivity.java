@@ -15,7 +15,6 @@ import android.widget.EditText;
 
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
-import com.unime.beacontest.beacon.Settings;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;

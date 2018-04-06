@@ -5,7 +5,7 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
-import com.unime.beacontest.beacon.Settings;
+import com.unime.beacontest.Settings;
 
 import org.altbeacon.beacon.Beacon;
 
