@@ -24,7 +24,6 @@ public class SmartCoreInteraction {
     private static final String HELLO_BROADCAST_MAJOR = "ffff";
     private static final String HELLO_ACK_ID = "ffffffff";
 
-    // private static final int HELLO_BROADCAST_ID_INDEX_END = HELLO_BROADCAST_ID_INDEX_START + 4;
     private static final int SCANNING_DURATION_MILLIS = 1000;
     private static final int SCANNING_DELAY_MILLIS = 0;
     private static final int SENDING_DURATION_MILLIS = 300;
@@ -69,8 +68,8 @@ public class SmartCoreInteraction {
                 BeaconModel.findMajor(data).equals(HELLO_BROADCAST_MAJOR) )
         {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
-            setHelloIv(ScanFilterUtils.getHelloIv(data) + HELLO_BROADCAST_MAJOR + getObjectId());
-            setObjectId(BeaconModel.findMinor(data));
+            setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
+            setObjectId(getHelloIv().substring(14,16));
             return true;
         }
         return false;
@@ -88,14 +87,24 @@ public class SmartCoreInteraction {
             byte[] encryptedPayload = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
             byte[] helloIvBytes = new byte[HELLO_IV_SIZE];
             System.arraycopy(data, 0, encryptedPayload, 0, ENCRYPTED_DATA_PAYLOAD_SIZE);
-            System.arraycopy(BaseEncoding.base16().decode(getHelloIv()), 0, helloIvBytes, 0, );
-            String wifiPassword = AES256.decrypt(encryptedPayload, Settings.key, helloIvBytes);
+            System.arraycopy(BaseEncoding.base16().decode(getHelloIv()), 0, helloIvBytes, 0, HELLO_IV_SIZE);
 
+            try {
+                String wifiPassword = AES256.decrypt(encryptedPayload, Settings.key, helloIvBytes);
+                return connectToWifi(Settings.ssid, wifiPassword);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             return true;
         }
         return false;
     };
+
+    private boolean connectToWifi(String ssid, String wifiPassword) {
+
+        return false; // todo implement
+    }
 
     public void checkForSmartEnvironment () {
         Handler delayScan = new Handler();
@@ -111,7 +120,7 @@ public class SmartCoreInteraction {
 
     public void sendHelloAck () {
         Beacon helloAck = new Beacon.Builder()
-                .setId1(HELLO_BROADCAST_ID.concat(getHelloIv().substring(0,12)))
+                .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,12)))
                 .setId2(Settings.USER_ID)
                 .setId3(getObjectId())
                 .setManufacturer(Settings.MANUFACTURER_ID)
@@ -127,7 +136,7 @@ public class SmartCoreInteraction {
         Handler delayScan = new Handler();
         delayScan.postDelayed(
                 () -> beaconService.scanning(
-                        ackFilter,
+                        wifiFilter,
                         Settings.SIGNAL_THRESHOLD,
                         SCANNING_DURATION_MILLIS,
                         ACTION_SCAN_ACK

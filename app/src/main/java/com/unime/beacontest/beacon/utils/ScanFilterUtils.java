@@ -12,7 +12,7 @@ public class ScanFilterUtils {
     private static final int HELLO_BROADCAST_ID_INDEX = 9;
     private static final int HELLO_BROADCAST_ID_SIZE = 4;
     private static final int HELLO_IV_INDEX = HELLO_BROADCAST_ID_INDEX + HELLO_BROADCAST_ID_SIZE;
-    private static final int HELLO_IV_SIZE = 12;
+    private static final int HELLO_IV_SIZE = 16;
 
     //private static final int MANUFACTURER_ID = 34952; // custom
     //private static final int MANUFACTURER_ID = 76; // apple
