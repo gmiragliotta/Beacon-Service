@@ -1,5 +1,8 @@
 package com.unime.beacontest.smartcoreinteraction;
 
+import android.content.Context;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.util.Log;
 
@@ -13,6 +16,7 @@ import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import org.altbeacon.beacon.Beacon;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
@@ -41,19 +45,19 @@ public class SmartCoreInteraction {
         this.beaconService = beaconService;
     }
 
-    public String getObjectId(){
+    private String getObjectId(){
         return objectId;
     }
 
-    public void setObjectId(String objectId) {
+    private void setObjectId(String objectId) {
         this.objectId = objectId;
     }
 
-    public String getHelloIv() {
+    private String getHelloIv() {
         return helloIv;
     }
 
-    public void setHelloIv(String helloIv) {
+    private void setHelloIv(String helloIv) {
         this.helloIv = helloIv;
     }
 
@@ -90,8 +94,12 @@ public class SmartCoreInteraction {
             System.arraycopy(BaseEncoding.base16().decode(getHelloIv()), 0, helloIvBytes, 0, HELLO_IV_SIZE);
 
             try {
-                String wifiPassword = AES256.decrypt(encryptedPayload, Settings.key, helloIvBytes);
-                return connectToWifi(Settings.ssid, wifiPassword);
+                String psk =
+                        new String(AES256.decrypt(encryptedPayload, Settings.key, helloIvBytes)
+                                .getBytes(StandardCharsets.UTF_8),
+                        StandardCharsets.UTF_8); // TODO check conversion hex to utf8
+
+                return connectToWifi(Settings.ssid, psk);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -101,9 +109,30 @@ public class SmartCoreInteraction {
         return false;
     };
 
-    private boolean connectToWifi(String ssid, String wifiPassword) {
+    private boolean connectToWifi(String ssid, String psk) {
+        WifiConfiguration wifiConfiguration = new WifiConfiguration();
+        wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
+        wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
+        WifiManager wifiManager = (WifiManager) beaconService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        return false; // todo implement
+        // remember network id
+        if(wifiManager == null)
+            return false;
+
+        int netId = wifiManager.addNetwork(wifiConfiguration);
+        if(netId != -1) {
+            boolean isDisconnetted = wifiManager.disconnect();
+            Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isDisconnected " + isDisconnetted);
+
+            boolean isEnabled = wifiManager.enableNetwork(netId, true);
+            Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isEnabled " + isEnabled);
+
+            boolean isReconnected = wifiManager.reconnect();
+            Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isReconnected " + isReconnected);
+
+            return isReconnected;
+        }
+        return false;
     }
 
     public void checkForSmartEnvironment () {
