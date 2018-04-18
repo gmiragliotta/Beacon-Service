@@ -126,8 +126,11 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setCommandClass("00");
                 beaconCommand.setCommandOpCode("01");
                 beaconCommand.setParameters("00", "00");
-                beaconCommand.setUserId("0001");
-                beaconCommand.setObjectId("00", "00");
+                beaconCommand.setUserId(Settings.USER_ID);
+                beaconCommand.setObjectId(
+                        Settings.OBJECT_ID.substring(0,2),
+                        Settings.OBJECT_ID.substring(2, 4)
+                );
 
                 mSmartObjectInteraction = new SmartObjectInteraction(mService);
                 mSmartObjectInteraction.setBeaconCommand(beaconCommand);

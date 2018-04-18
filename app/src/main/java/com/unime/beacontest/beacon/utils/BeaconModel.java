@@ -144,7 +144,7 @@ public class BeaconModel implements Serializable {
     }
 
     public static String findMajor(final byte[] data){
-
+        //TODO is lowercase?
         String major = String.format("%02x%02x", data[ARGS_START_INDEX], data[ARGS_START_INDEX + 1]);
         return major;
     }

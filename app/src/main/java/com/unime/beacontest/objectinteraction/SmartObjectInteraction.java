@@ -36,7 +36,7 @@ public class SmartObjectInteraction {
 
     public void incRetryCounter() {
         retryCounter++;
-    }
+    } // TODO counter overflow
 
     public int getRetryCounter() {
         return retryCounter;
