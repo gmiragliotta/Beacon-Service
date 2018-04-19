@@ -22,6 +22,7 @@ import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 import java.util.Objects;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
@@ -49,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // TODO add actions here when adding custom actions
         mIntentFilter.addAction(ACTION_SCAN_ACK);
+        mIntentFilter.addAction(ACTION_SCAN_SMART_ENV);
+        mIntentFilter.addAction(ACTION_SCAN_PSK);
 
         editTextCounter = (EditText) findViewById(R.id.counter);
         editIdObj = (EditText) findViewById(R.id.idobj);
@@ -175,8 +178,9 @@ public class MainActivity extends AppCompatActivity {
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());
 
-                if(null != mSmartObjectInteraction && mBound)
+                if(null != mSmartObjectInteraction && mBound) {
                     mService.verifyAck(beaconResults, mSmartObjectInteraction);
+                }
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());

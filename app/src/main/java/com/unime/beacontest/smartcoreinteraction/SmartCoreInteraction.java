@@ -33,7 +33,7 @@ public class SmartCoreInteraction {
 
     private static final int SCANNING_DURATION_MILLIS = 1000;
     private static final int SCANNING_DELAY_MILLIS = 0;
-    private static final int SENDING_DURATION_MILLIS = 300;
+    private static final int SENDING_DURATION_MILLIS = 2000;
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 

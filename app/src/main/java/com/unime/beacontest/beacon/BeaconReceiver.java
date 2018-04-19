@@ -86,6 +86,7 @@ public class BeaconReceiver {
                 Log.d(TAG, "No beacon detected after " + scanDuration  + " ms: stopScanning");
             }
             Log.d(TAG, "Stop scanning after " + scanDuration  + " ms");
+           // Log.d(TAG, "Stop scanning after " + scanDuration  + " ms " + getAction());
             mBluetoothLeScanner.stopScan(callback);
 
             // broadcast ActionScanningComplete message
@@ -95,6 +96,9 @@ public class BeaconReceiver {
             Log.d(TAG, "getScanCallback: " + beaconResults);
             intent.putExtra(BEACON_RESULTS, beaconResults);
             getContext().sendBroadcast(intent);
+            Log.d(TAG, "getScanCallback: " + getContext().getApplicationContext());
+//            Log.d(TAG, "getScanCallback: sono qua" + ((BeaconResults)
+//                    intent.getSerializableExtra(BEACON_RESULTS)).getResults());
         }, scanDuration);
 
         return new ScanCallback() {
