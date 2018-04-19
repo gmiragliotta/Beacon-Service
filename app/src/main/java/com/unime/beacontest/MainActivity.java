@@ -22,6 +22,7 @@ import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 import java.util.Objects;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class MainActivity extends AppCompatActivity {
@@ -137,7 +138,8 @@ public class MainActivity extends AppCompatActivity {
                 mSmartObjectInteraction.interact();
                 */
              mSmartCoreInteraction = new SmartCoreInteraction(mService);
-             mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
+             // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
+                mSmartCoreInteraction.sendHelloAck();
             }
         }
     }
@@ -174,8 +176,13 @@ public class MainActivity extends AppCompatActivity {
 
                 if(null != mSmartObjectInteraction && mBound)
                     mService.verifyAck(beaconResults, mSmartObjectInteraction);
-            }
+            } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
+                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+                Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
+                if(null != mSmartCoreInteraction && mBound)
+                    mSmartCoreInteraction.sendHelloAck();
+            }
         }
     }
 }

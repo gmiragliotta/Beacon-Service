@@ -21,7 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 
 public class SmartCoreInteraction {
     public static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
@@ -183,7 +184,7 @@ public class SmartCoreInteraction {
                         helloBroadcastFilter,
                         Settings.SIGNAL_THRESHOLD,
                         SCANNING_DURATION_MILLIS,
-                        ACTION_SCAN_ACK
+                        ACTION_SCAN_SMART_ENV
                 ), SCANNING_DELAY_MILLIS
         );
     }
@@ -209,7 +210,7 @@ public class SmartCoreInteraction {
                         wifiFilter,
                         Settings.SIGNAL_THRESHOLD,
                         SCANNING_DURATION_MILLIS,
-                        ACTION_SCAN_ACK
+                        ACTION_SCAN_PSK
                 ), SCANNING_DELAY_MILLIS
         );
     }
