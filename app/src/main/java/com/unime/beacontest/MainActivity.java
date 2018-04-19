@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 */
              mSmartCoreInteraction = new SmartCoreInteraction(mService);
              // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
-                mSmartCoreInteraction.sendHelloAck();
+                mSmartCoreInteraction.checkForSmartEnvironment();
             }
         }
     }
@@ -170,18 +170,21 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
+            Log.d(TAG, "BeaconBroadcastReceiver: action " + intent.getAction());
             if(Objects.equals(intent.getAction(), ACTION_SCAN_ACK)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-                Log.d(TAG, "onReceive: " + beaconResults.getResults());
+                Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());
 
                 if(null != mSmartObjectInteraction && mBound)
                     mService.verifyAck(beaconResults, mSmartObjectInteraction);
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-                Log.d(TAG, "onReceive: " + beaconResults.getResults());
+                Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());
 
-                if(null != mSmartCoreInteraction && mBound)
+                if(null != mSmartCoreInteraction && mBound) {
+                    Log.d(TAG, "BeaconBroadcastReceiver: sendHelloAck");
                     mSmartCoreInteraction.sendHelloAck();
+                }
             }
         }
     }

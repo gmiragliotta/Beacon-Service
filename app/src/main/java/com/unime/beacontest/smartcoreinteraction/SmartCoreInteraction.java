@@ -178,6 +178,7 @@ public class SmartCoreInteraction {
 
 
     public void checkForSmartEnvironment () {
+        Log.d(SMART_CORE_INTERACTION_TAG, "checkForSmartEnvironment: start");
         Handler delayScan = new Handler();
         delayScan.postDelayed(
                 () -> beaconService.scanning(
