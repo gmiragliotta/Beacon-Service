@@ -19,6 +19,7 @@ import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
@@ -176,19 +177,24 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "BeaconBroadcastReceiver: action " + intent.getAction());
             if(Objects.equals(intent.getAction(), ACTION_SCAN_ACK)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-                Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());
+                Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
                 if(null != mSmartObjectInteraction && mBound) {
                     mService.verifyAck(beaconResults, mSmartObjectInteraction);
                 }
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-                Log.d(TAG, "BeaconBroadcastReceiver: " + beaconResults.getResults());
+                Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
                 if(null != mSmartCoreInteraction && mBound) {
-                    Log.d(TAG, "BeaconBroadcastReceiver: sendHelloAck");
+                    Log.d(TAG, "onReceive: sendHelloAck");
                     mSmartCoreInteraction.sendHelloAck();
+                    mSmartCoreInteraction.checkForWifiPassword();
                 }
+            } else if (Objects.equals(intent.getAction(), ACTION_SCAN_PSK)) {
+                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+                List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
+                Log.d(TAG, "onReceive: Passwords " + passwords);
             }
         }
     }

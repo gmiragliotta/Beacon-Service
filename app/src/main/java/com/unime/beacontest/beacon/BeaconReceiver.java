@@ -140,7 +140,7 @@ public class BeaconReceiver {
                 result.getTimestampNanos(),
                 device.getAddress()
         );
-        beaconResults.addResults(beaconDetected);
+        beaconResults.addResult(beaconDetected);
 
         try {
             Log.d(TAG, "uuid: " + beaconDetected.getUuid() +

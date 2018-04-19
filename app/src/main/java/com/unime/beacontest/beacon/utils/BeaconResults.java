@@ -17,8 +17,14 @@ public class BeaconResults implements Serializable {
         return founded;
     }
 
-    public void addResults(BeaconModel beaconDetected) {
+    public void addResult(BeaconModel beaconDetected) {
         founded.add(beaconDetected);
+    }
+
+    public void clear() {
+        if(!founded.isEmpty()) {
+            founded.clear();
+        }
     }
 
 }

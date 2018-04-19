@@ -17,9 +17,10 @@ import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import org.altbeacon.beacon.Beacon;
 
-import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
@@ -31,9 +32,11 @@ public class SmartCoreInteraction {
     private static final String HELLO_BROADCAST_MAJOR = "ffff";
     private static final String HELLO_ACK_ID = "ffffffff";
 
-    private static final int SCANNING_DURATION_MILLIS = 1000;
+    private static final int SCANNING_DURATION_SMART_ENV = 1000;
+    private static final int SCANNING_DURATION_WIFI_PSK = 500;
     private static final int SCANNING_DELAY_MILLIS = 0;
-    private static final int SENDING_DURATION_MILLIS = 2000;
+    private static final int SCANNING_DELAY_MILLIS_PSK = 150;
+    private static final int SENDING_DURATION_MILLIS = 300;
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
@@ -79,7 +82,8 @@ public class SmartCoreInteraction {
         {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
-            setObjectId(getHelloIv().substring(14,16));
+            setObjectId(getHelloIv().substring(28,32));
+            Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv() + "objid" + getHelloIv());
             return true;
         }
         return false;
@@ -93,27 +97,48 @@ public class SmartCoreInteraction {
                 BeaconModel.findMajor(data).equals(Settings.USER_ID) &&
                 BeaconModel.findMinor(data).equals(Settings.OBJECT_ID) )
         {
-            // decrypt payload
-            byte[] encryptedPayload = new byte[ENCRYPTED_DATA_PAYLOAD_SIZE];
-            byte[] helloIvBytes = new byte[HELLO_IV_SIZE];
-            System.arraycopy(data, 0, encryptedPayload, 0, ENCRYPTED_DATA_PAYLOAD_SIZE);
-            System.arraycopy(BaseEncoding.base16().decode(getHelloIv()), 0, helloIvBytes, 0, HELLO_IV_SIZE);
 
-            try {
-                String psk =
-                        new String(AES256.decrypt(encryptedPayload, Settings.key, helloIvBytes)
-                                .getBytes(StandardCharsets.UTF_8),
-                        StandardCharsets.UTF_8); // TODO check conversion hex to utf8
-                connectToWifi(Settings.ssid, psk);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             return true;
         }
         return false;
     };
 
+    public List<String> getPasswords(Set<BeaconModel> results) {
+        List<String> passwords = new ArrayList<>();
+
+        for(BeaconModel result : results) {
+            // decrypt payload
+
+                String psk = decryptPsk(result);
+                passwords.add(psk);
+
+        }
+        return passwords;
+    }
+
+    private String decryptPsk (BeaconModel result) {
+        String psk = "";
+        Log.d(SMART_CORE_INTERACTION_TAG, "decryptPsk: clearuuid "+result.getClearUuid() +"\n" +
+                getHelloIv());
+        try {
+        //new String(
+          //      BaseEncoding.base16().lowerCase().decode(
+                        psk = AES256.decrypt(
+                                BaseEncoding.base16().lowerCase().decode(result.getClearUuid()),
+                                Settings.key,
+                                BaseEncoding.base16().lowerCase().decode(getHelloIv())
+                );//,
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return psk;
+            //    StandardCharsets.UTF_8); // TODO check conversion hex to utf8
+
+    }
+
+
     public void connectToWifi(String ssid, String psk) { // TODO it works?
+
         WifiConfiguration wifiConfiguration = new WifiConfiguration();
         wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
         // wifiConfiguration.hiddenSSID = true;
@@ -184,7 +209,7 @@ public class SmartCoreInteraction {
                 () -> beaconService.scanning(
                         helloBroadcastFilter,
                         Settings.SIGNAL_THRESHOLD,
-                        SCANNING_DURATION_MILLIS,
+                        SCANNING_DURATION_SMART_ENV,
                         ACTION_SCAN_SMART_ENV
                 ), SCANNING_DELAY_MILLIS
         );
@@ -192,7 +217,7 @@ public class SmartCoreInteraction {
 
     public void sendHelloAck () {
         Beacon helloAck = new Beacon.Builder()
-                .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,12)))
+                .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,24)))
                 .setId2(Settings.USER_ID)
                 .setId3(getObjectId())
                 .setManufacturer(Settings.MANUFACTURER_ID)
@@ -200,7 +225,7 @@ public class SmartCoreInteraction {
                 .setRssi(Settings.RSSI)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
-
+        Log.d(SMART_CORE_INTERACTION_TAG, "sendHelloAck: " + helloAck);
         beaconService.sending(helloAck, SENDING_DURATION_MILLIS);
     }
 
@@ -210,11 +235,10 @@ public class SmartCoreInteraction {
                 () -> beaconService.scanning(
                         wifiFilter,
                         Settings.SIGNAL_THRESHOLD,
-                        SCANNING_DURATION_MILLIS,
+                        SCANNING_DURATION_WIFI_PSK,
                         ACTION_SCAN_PSK
-                ), SCANNING_DELAY_MILLIS
+                ), SCANNING_DELAY_MILLIS_PSK
         );
     }
-
 
 }
