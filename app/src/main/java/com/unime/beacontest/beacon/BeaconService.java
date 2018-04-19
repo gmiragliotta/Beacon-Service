@@ -153,10 +153,7 @@ public class BeaconService extends Service {
         beaconCommand.setCommandClass("FF");
         beaconCommand.setCommandOpCode("FF");
         beaconCommand.setUserId(Settings.USER_ID);
-        beaconCommand.setObjectId(
-                hexObjectId.substring(0,2),
-                hexObjectId.substring(2, 4)
-        );
+        beaconCommand.setObjectId(hexObjectId);
 
         sending(beaconCommand.build(), 0);
 

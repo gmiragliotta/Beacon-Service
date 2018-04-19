@@ -16,8 +16,8 @@ import android.widget.EditText;
 import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.beacon.BeaconService.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
+import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 
 import java.util.Objects;
 
@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editIdUser;
 
     private SmartObjectInteraction mSmartObjectInteraction;
+    private SmartCoreInteraction mSmartCoreInteraction;
 
 
     @Override
@@ -119,6 +120,8 @@ public class MainActivity extends AppCompatActivity {
                 mService.scanning(customFilter, -70, 5000);
             }
             */
+
+             /*   // test invio comando
                 BeaconCommand beaconCommand = new BeaconCommand();
                 // beaconCommand.setBitmap((byte)0b11111111); // it works!
                 beaconCommand.setCounter(Settings.counter);
@@ -132,6 +135,10 @@ public class MainActivity extends AppCompatActivity {
                 mSmartObjectInteraction = new SmartObjectInteraction(mService);
                 mSmartObjectInteraction.setBeaconCommand(beaconCommand);
                 mSmartObjectInteraction.interact();
+                */
+             mSmartCoreInteraction = new SmartCoreInteraction(mService);
+             boolean state = mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
+                Log.d(TAG, "accesso: " + state);
             }
         }
     }

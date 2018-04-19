@@ -18,6 +18,7 @@ import org.altbeacon.beacon.Beacon;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 
@@ -34,6 +35,9 @@ public class SmartCoreInteraction {
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
+    private static final String NET_ID_PREF_KEY = "NetworkId";
+    private static final String SHARED_PREF_NAME = "SmartCorePreferences";
+
     public static final int MAX_ACK_RETRY = 2;
 
     private BeaconService beaconService;
@@ -41,7 +45,7 @@ public class SmartCoreInteraction {
     private String objectId;
     private int retryCounter = 0;
 
-    public SmartCoreInteraction(BeaconService beaconService, String objectId) {
+    public SmartCoreInteraction(BeaconService beaconService) {
         this.beaconService = beaconService;
     }
 
@@ -109,17 +113,38 @@ public class SmartCoreInteraction {
         return false;
     };
 
-    private boolean connectToWifi(String ssid, String psk) {
-        WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
-        wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
+    public boolean connectToWifi(String ssid, String psk) { //TODO it works?
+        WifiConfiguration newWifiConfig = new WifiConfiguration();
+        newWifiConfig.SSID = String.format("\"%s\"", Settings.ssid);
+        newWifiConfig.preSharedKey = String.format("\"%s\"", psk);
         WifiManager wifiManager = (WifiManager) beaconService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
-        // remember network id
-        if(wifiManager == null)
-            return false;
+        boolean connSuccessfull = false;
 
-        int netId = wifiManager.addNetwork(wifiConfiguration);
+        if(wifiManager == null) {
+            return false;
+        }
+
+        // if(! wifiManager.isWifiEnabled())
+        //
+
+        // int netId = wifiManager.addNetwork(wifiConfiguration);
+
+        List<WifiConfiguration> wifiConfigurations = wifiManager.getConfiguredNetworks();
+
+        for (WifiConfiguration wifiConfiguration : wifiConfigurations) {
+            if (wifiConfiguration.SSID.equals("\"" + ssid + "\"") &&
+                    wifiConfiguration.preSharedKey.equals("\"" + psk + "\"")) { // already registered with valid password
+                wifiManager.enableNetwork(wifiConfiguration.networkId, true);
+                boolean isReconnected = wifiManager.reconnect();
+                Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isReconnected " + isReconnected);
+                connSuccessfull = true;
+            } else if (wifiConfiguration.SSID.equals("\"" + ssid + "\"")) { // already registered but psk has changed
+                wifiManager.updateNetwork(wifiConfiguration);
+            }
+        }
+
+
         if(netId != -1) {
             boolean isDisconnetted = wifiManager.disconnect();
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isDisconnected " + isDisconnetted);
