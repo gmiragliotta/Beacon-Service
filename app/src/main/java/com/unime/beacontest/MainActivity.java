@@ -137,8 +137,7 @@ public class MainActivity extends AppCompatActivity {
                 mSmartObjectInteraction.interact();
                 */
              mSmartCoreInteraction = new SmartCoreInteraction(mService);
-             boolean state = mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
-                Log.d(TAG, "accesso: " + state);
+             mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
             }
         }
     }
