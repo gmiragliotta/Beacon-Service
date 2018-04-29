@@ -17,6 +17,7 @@ import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
 import org.altbeacon.beacon.Beacon;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,7 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 
 public class SmartCoreInteraction {
-    public static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
+    private static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
 
     private static final String HELLO_BROADCAST_ID = "00000000";
     private static final String HELLO_BROADCAST_MAJOR = "ffff";
@@ -40,15 +41,17 @@ public class SmartCoreInteraction {
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
-    private static final String NET_ID_PREF_KEY = "NetworkId";
-    private static final String SHARED_PREF_NAME = "SmartCorePreferences";
+    public static final String NET_ID_PREF_KEY = "NetworkId";
+    public static final String SHARED_PREF_NAME = "SmartCorePreferences";
 
     public static final int MAX_ACK_RETRY = 2;
+    public static final int MAX_CONN_RETRY = 2;
 
     private BeaconService beaconService;
     private String helloIv;
     private String objectId;
-    private int retryCounter = 0;
+    private int ackRetryCounter = 0;
+    private int connRetryCounter = 0;
 
     public SmartCoreInteraction(BeaconService beaconService) {
         this.beaconService = beaconService;
@@ -70,6 +73,30 @@ public class SmartCoreInteraction {
         this.helloIv = helloIv;
     }
 
+    public void incAckRetryCounter() {
+        ackRetryCounter++;
+
+        if(ackRetryCounter == MAX_ACK_RETRY) {
+            ackRetryCounter = 0;
+        }
+    }
+
+    public int getAckRetryCounter() {
+        return ackRetryCounter;
+    }
+
+    public int getConnRetryCounter() {
+        return connRetryCounter;
+    }
+
+    public void incConnRetryCounter() {
+        connRetryCounter++;
+
+        if(connRetryCounter == MAX_CONN_RETRY) {
+            connRetryCounter = 0;
+        }
+    }
+
     private Filter helloBroadcastFilter = (data) -> {
         //String hexData = BaseEncoding.base16().encode(data);
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
@@ -81,9 +108,12 @@ public class SmartCoreInteraction {
                 BeaconModel.findMajor(data).equals(HELLO_BROADCAST_MAJOR) )
         {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
+
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
             setObjectId(getHelloIv().substring(28,32));
+
             Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv() + "objid" + getHelloIv());
+
             return true;
         }
         return false;
@@ -118,22 +148,20 @@ public class SmartCoreInteraction {
 
     private String decryptPsk (BeaconModel result) {
         String psk = "";
-        Log.d(SMART_CORE_INTERACTION_TAG, "decryptPsk: clearuuid "+result.getClearUuid() +"\n" +
-                getHelloIv());
+        // Log.d(SMART_CORE_INTERACTION_TAG, "decryptPsk: clearuuid "+result.getClearUuid() +"\n" +
+        //     getHelloIv());
         try {
-        //new String(
-          //      BaseEncoding.base16().lowerCase().decode(
-                        psk = AES256.decrypt(
+            psk = new String(
+                BaseEncoding.base16().lowerCase().decode(
+                        AES256.decrypt(
                                 BaseEncoding.base16().lowerCase().decode(result.getClearUuid()),
                                 Settings.key,
                                 BaseEncoding.base16().lowerCase().decode(getHelloIv())
-                );//,
+                )),    StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return psk;
-            //    StandardCharsets.UTF_8); // TODO check conversion hex to utf8
-
     }
 
 

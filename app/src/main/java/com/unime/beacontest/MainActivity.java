@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +29,8 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
+import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -34,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
     boolean mBound = false;
 
     private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
-    private IntentFilter mIntentFilter = new IntentFilter();
+    private IntentFilter beaconIntentFilter = new IntentFilter();
+    private IntentFilter networkIntentFilter = new IntentFilter();
 
     private EditText editTextCounter;
     private EditText editTextCommand;
@@ -50,9 +56,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // TODO add actions here when adding custom actions
-        mIntentFilter.addAction(ACTION_SCAN_ACK);
-        mIntentFilter.addAction(ACTION_SCAN_SMART_ENV);
-        mIntentFilter.addAction(ACTION_SCAN_PSK);
+        beaconIntentFilter.addAction(ACTION_SCAN_ACK);
+        beaconIntentFilter.addAction(ACTION_SCAN_SMART_ENV);
+        beaconIntentFilter.addAction(ACTION_SCAN_PSK);
+
+        networkIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
         editTextCounter = (EditText) findViewById(R.id.counter);
         editIdObj = (EditText) findViewById(R.id.idobj);
@@ -67,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, BeaconService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-        registerReceiver(beaconBroadcastReceiver, mIntentFilter);
+        registerReceiver(beaconBroadcastReceiver, beaconIntentFilter);
     }
 
     @Override
@@ -175,8 +183,10 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             // TODO do something with this data
             Log.d(TAG, "BeaconBroadcastReceiver: action " + intent.getAction());
+
             if(Objects.equals(intent.getAction(), ACTION_SCAN_ACK)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
                 if(null != mSmartObjectInteraction && mBound) {
@@ -184,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
+
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
                 if(null != mSmartCoreInteraction && mBound) {
@@ -194,8 +205,35 @@ public class MainActivity extends AppCompatActivity {
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_PSK)) {
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
+
                 Log.d(TAG, "onReceive: Passwords " + passwords);
+                // todo try all passwords?
+                mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
             }
+        }
+    }
+
+    public class NetworkStateBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+            if(wifiManager == null) {
+                return;
+            }
+
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
+            SharedPreferences sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            int netId = sharedPref.getInt(NET_ID_PREF_KEY, -1);
+
+            if(wifiInfo.getNetworkId() != netId) {
+                // something went wrong
+                mSmartCoreInteraction.incConnRetryCounter();
+                mSmartCoreInteraction.checkForWifiPassword();
+            }
+
+            // todo unregister receiver insmartcore interaction
         }
     }
 }
