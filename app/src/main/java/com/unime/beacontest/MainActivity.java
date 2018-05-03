@@ -29,6 +29,7 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.MAX_CONN_RETRY;
 import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
 import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
 
@@ -199,8 +200,11 @@ public class MainActivity extends AppCompatActivity {
 
                 if(null != mSmartCoreInteraction && mBound) {
                     Log.d(TAG, "onReceive: sendHelloAck");
-                    mSmartCoreInteraction.sendHelloAck();
-                    mSmartCoreInteraction.checkForWifiPassword();
+                    if(mSmartCoreInteraction.getHelloIv() != null) {
+                        mSmartCoreInteraction.sendHelloAck();
+                        mSmartCoreInteraction.checkForWifiPassword();
+                    }
+
                 }
             } else if (Objects.equals(intent.getAction(), ACTION_SCAN_PSK)) {
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
@@ -230,7 +234,11 @@ public class MainActivity extends AppCompatActivity {
             if(wifiInfo.getNetworkId() != netId) {
                 // something went wrong
                 mSmartCoreInteraction.incConnRetryCounter();
-                mSmartCoreInteraction.checkForWifiPassword();
+                if(mSmartCoreInteraction.getConnRetryCounter() <= MAX_CONN_RETRY) {
+                    mSmartCoreInteraction.checkForWifiPassword();
+                } else {
+                    mSmartCoreInteraction.resetConnRetryCounter();
+                }
             }
 
             // todo unregister receiver insmartcore interaction

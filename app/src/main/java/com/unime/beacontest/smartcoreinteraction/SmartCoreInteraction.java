@@ -65,7 +65,7 @@ public class SmartCoreInteraction {
         this.objectId = objectId;
     }
 
-    private String getHelloIv() {
+    public String getHelloIv() {
         return helloIv;
     }
 
@@ -81,6 +81,19 @@ public class SmartCoreInteraction {
         }
     }
 
+    public void resetAckRetryCounter() {
+        // todo check if it's necessary
+        if(ackRetryCounter == MAX_ACK_RETRY) {
+            ackRetryCounter = 0;
+        }
+    }
+
+    public void resetConnRetryCounter() {
+        if(connRetryCounter == MAX_CONN_RETRY) {
+            connRetryCounter = 0;
+        }
+    }
+
     public int getAckRetryCounter() {
         return ackRetryCounter;
     }
@@ -91,10 +104,6 @@ public class SmartCoreInteraction {
 
     public void incConnRetryCounter() {
         connRetryCounter++;
-
-        if(connRetryCounter == MAX_CONN_RETRY) {
-            connRetryCounter = 0;
-        }
     }
 
     private Filter helloBroadcastFilter = (data) -> {
@@ -244,6 +253,10 @@ public class SmartCoreInteraction {
     }
 
     public void sendHelloAck () {
+//        if(getHelloIv() == null) {
+//            return;
+//        }
+
         Beacon helloAck = new Beacon.Builder()
                 .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,24)))
                 .setId2(Settings.USER_ID)
