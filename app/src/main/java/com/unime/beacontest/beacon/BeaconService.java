@@ -89,6 +89,7 @@ public class BeaconService extends Service {
             }
 
             beaconTransmitter.startAdvertising(beacon);
+            Log.d(BEACON_SERVICE_TAG, "sending: " + beacon);
 
             // stop advertising after  delayMillis
             Handler mCanceller = new Handler();

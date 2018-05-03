@@ -34,10 +34,10 @@ public class SmartCoreInteraction {
     private static final String HELLO_ACK_ID = "ffffffff";
 
     private static final int SCANNING_DURATION_SMART_ENV = 1000;
-    private static final int SCANNING_DURATION_WIFI_PSK = 500;
+    private static final int SCANNING_DURATION_WIFI_PSK = 1500; // todo occhio
     private static final int SCANNING_DELAY_MILLIS = 0;
     private static final int SCANNING_DELAY_MILLIS_PSK = 150;
-    private static final int SENDING_DURATION_MILLIS = 300;
+    private static final int SENDING_DURATION_MILLIS = 1300; // todo occhio
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
@@ -206,7 +206,7 @@ public class SmartCoreInteraction {
                     sharedPref.getInt(NET_ID_PREF_KEY, -1) == wifiConfig.networkId) {
                 wifiConfigFounded = true;
                 wifiConfiguration.networkId = wifiConfig.networkId;
-                Log.d("eccomi", "connectToWifi: ciaone" + wifiConfiguration.networkId);
+                Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + psk);
             }
         }
 
@@ -253,9 +253,7 @@ public class SmartCoreInteraction {
     }
 
     public void sendHelloAck () {
-//        if(getHelloIv() == null) {
-//            return;
-//        }
+        assert getHelloIv() != null;
 
         Beacon helloAck = new Beacon.Builder()
                 .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,24)))

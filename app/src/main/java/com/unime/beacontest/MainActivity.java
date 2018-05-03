@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -29,9 +27,6 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
-import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.MAX_CONN_RETRY;
-import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
-import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -40,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     boolean mBound = false;
 
     private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
+    private NetworkStateBroadcastReceiver networkStateBroadcastReceiver = new NetworkStateBroadcastReceiver();
     private IntentFilter beaconIntentFilter = new IntentFilter();
     private IntentFilter networkIntentFilter = new IntentFilter();
 
@@ -77,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         registerReceiver(beaconBroadcastReceiver, beaconIntentFilter);
+        registerReceiver(networkStateBroadcastReceiver, networkIntentFilter);
     }
 
     @Override
@@ -85,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         unbindService(mConnection);
         mBound = false;
         unregisterReceiver(beaconBroadcastReceiver);
+        unregisterReceiver(networkStateBroadcastReceiver);
     }
 
     /** Called when a button is clicked (the button in the layout file attaches to
@@ -212,7 +210,10 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d(TAG, "onReceive: Passwords " + passwords);
                 // todo try all passwords?
-                mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
+                if (passwords.size() >= 1) {
+                    mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
+                    Log.d(TAG, "onReceive: ooooooooooo password: " + passwords.get(0));
+                }
             }
         }
     }
@@ -220,26 +221,27 @@ public class MainActivity extends AppCompatActivity {
     public class NetworkStateBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-            if(wifiManager == null) {
-                return;
-            }
-
-            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-
-            SharedPreferences sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            int netId = sharedPref.getInt(NET_ID_PREF_KEY, -1);
-
-            if(wifiInfo.getNetworkId() != netId) {
-                // something went wrong
-                mSmartCoreInteraction.incConnRetryCounter();
-                if(mSmartCoreInteraction.getConnRetryCounter() <= MAX_CONN_RETRY) {
-                    mSmartCoreInteraction.checkForWifiPassword();
-                } else {
-                    mSmartCoreInteraction.resetConnRetryCounter();
-                }
-            }
+//            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//
+//            if(wifiManager == null) {
+//                return;
+//            }
+//
+//            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+//
+//            SharedPreferences sharedPref = getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//            int netId = sharedPref.getInt(NET_ID_PREF_KEY, -1);
+//
+//            if(wifiInfo.getNetworkId() != netId && mSmartCoreInteraction != null) {
+//                // something went wrong
+//                Log.d(TAG, "onReceive: retrying connection");
+//                mSmartCoreInteraction.incConnRetryCounter();
+//                if(mSmartCoreInteraction.getConnRetryCounter() <= MAX_CONN_RETRY) {
+//                    mSmartCoreInteraction.checkForWifiPassword();
+//                } else {
+//                    mSmartCoreInteraction.resetConnRetryCounter();
+//                }
+//            }
 
             // todo unregister receiver insmartcore interaction
         }
