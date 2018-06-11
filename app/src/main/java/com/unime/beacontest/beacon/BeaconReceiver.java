@@ -10,13 +10,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.beacon.utils.Filter;
+import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_COMPLETE;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.*;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class BeaconReceiver {
@@ -24,6 +26,7 @@ public class BeaconReceiver {
 
     private Context context;
     private Filter filter;
+    private HandlerThread handlerThread;
     private BluetoothLeScanner mBluetoothLeScanner;
     private BluetoothAdapter mBluetoothAdapter;
     private ScanCallback callback;
@@ -35,11 +38,11 @@ public class BeaconReceiver {
 
     private BeaconResults beaconResults = new BeaconResults();
 
-    public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter, Filter filter) {
+    public BeaconReceiver(Context context, BluetoothAdapter mBluetoothAdapter, Filter filter, HandlerThread handlerThread) {
         this.context = context;
         this.mBluetoothAdapter = mBluetoothAdapter;
-        this.action = ACTION_SCAN_COMPLETE;
         this.filter = filter;
+        this.handlerThread = handlerThread;
     }
 
     public Context getContext() {
@@ -57,6 +60,7 @@ public class BeaconReceiver {
 
     // start scanning and return a BeaconResults instance
     public void startScanning(int signalThreshold, int scanDuration) { // todo qui
+        Log.d(TAG, "startScanning");
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration;
         settings = getScanSettings();
@@ -89,16 +93,17 @@ public class BeaconReceiver {
            // Log.d(TAG, "Stop scanning after " + scanDuration  + " ms " + getAction());
             mBluetoothLeScanner.stopScan(callback);
 
-            // broadcast ActionScanningComplete message
-            Intent intent = new Intent();
+            // start the right service and pass the results
+            Intent intent = new Intent(getContext(), chooseService(getAction()));
 
             intent.setAction(getAction());
             Log.d(TAG, "getScanCallback: " + beaconResults);
             intent.putExtra(BEACON_RESULTS, beaconResults);
-            getContext().sendBroadcast(intent);
-            Log.d(TAG, "getScanCallback: " + getContext().getApplicationContext());
-//            Log.d(TAG, "getScanCallback: sono qua" + ((BeaconResults)
-//                    intent.getSerializableExtra(BEACON_RESULTS)).getResults());
+
+            getContext().startService(intent);
+
+            // Terminate thread
+            handlerThread.quitSafely();
         }, scanDuration);
 
         return new ScanCallback() {
@@ -149,6 +154,26 @@ public class BeaconReceiver {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    private Class chooseService (String action) {
+        Class chosenService;
+
+        switch(action) {
+            case ACTION_SCAN_ACK:
+            case ACTION_SEND_COMMAND_OBJ:
+                chosenService = SmartObjectIntentService.class;
+                break;
+            case ACTION_SCAN_SMART_ENV:
+            case ACTION_SCAN_PSK:
+                chosenService = null; // TODO implement intent service
+                break;
+            default:
+                chosenService = null;
+        }
+
+        return chosenService;
     }
 
 }

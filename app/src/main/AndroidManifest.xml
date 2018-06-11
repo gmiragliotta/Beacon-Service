@@ -28,8 +28,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".beacon.BeaconService"
+        <service android:name=".beacon.BeaconService2"
             android:exported="false" />
+        <service android:name=".objectinteraction.SmartObjectIntentService"
+            android:exported="false"/>
 
     </application>
 

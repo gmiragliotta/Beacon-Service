@@ -1,10 +1,12 @@
 package com.unime.beacontest.beacon.utils;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Objects;
 
 
-public class BeaconModel implements Serializable {
+public class BeaconModel implements Parcelable {
 
     private static final String TAG = "BeaconModel";
 
@@ -183,4 +185,42 @@ public class BeaconModel implements Serializable {
     public int hashCode() {
         return Objects.hash(getUuid(), getMajor(), getMinor());
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.uuid);
+        dest.writeString(this.major);
+        dest.writeString(this.minor);
+        dest.writeInt(this.txPower);
+        dest.writeInt(this.rssi);
+        dest.writeLong(this.timestamp);
+        dest.writeString(this.address);
+    }
+
+    protected BeaconModel(Parcel in) {
+        this.uuid = in.readString();
+        this.major = in.readString();
+        this.minor = in.readString();
+        this.txPower = in.readInt();
+        this.rssi = in.readInt();
+        this.timestamp = in.readLong();
+        this.address = in.readString();
+    }
+
+    public static final Parcelable.Creator<BeaconModel> CREATOR = new Parcelable.Creator<BeaconModel>() {
+        @Override
+        public BeaconModel createFromParcel(Parcel source) {
+            return new BeaconModel(source);
+        }
+
+        @Override
+        public BeaconModel[] newArray(int size) {
+            return new BeaconModel[size];
+        }
+    };
 }

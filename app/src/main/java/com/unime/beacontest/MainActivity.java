@@ -14,9 +14,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.unime.beacontest.beacon.BeaconService;
-import com.unime.beacontest.beacon.BeaconService.LocalBinder;
+import com.unime.beacontest.beacon.BeaconService2;
+import com.unime.beacontest.beacon.BeaconService2.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.beacontest.objectinteraction.BeaconCommand;
+import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 
@@ -26,12 +28,14 @@ import java.util.Objects;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.objectinteraction.SmartObjectIntentService.EXTRA_BEACON_COMMAND;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
-    BeaconService mService;
+    BeaconService2 mService;
     boolean mBound = false;
 
     private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
@@ -69,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Bind to LocalService
-        Intent intent = new Intent(this, BeaconService.class);
+        Intent intent = new Intent(this, BeaconService2.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         registerReceiver(beaconBroadcastReceiver, beaconIntentFilter);
@@ -133,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
             }
             */
 
-             /*   // test invio comando
+                // test invio comando
                 BeaconCommand beaconCommand = new BeaconCommand();
                 // beaconCommand.setBitmap((byte)0b11111111); // it works!
                 beaconCommand.setCounter(Settings.counter);
@@ -144,13 +148,23 @@ public class MainActivity extends AppCompatActivity {
                 beaconCommand.setUserId(Settings.USER_ID);
                 beaconCommand.setObjectId(Settings.OBJECT_ID);
 
-                mSmartObjectInteraction = new SmartObjectInteraction(mService);
-                mSmartObjectInteraction.setBeaconCommand(beaconCommand);
-                mSmartObjectInteraction.interact();
-                */
-             mSmartCoreInteraction = new SmartCoreInteraction(mService);
+                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
+                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
+                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
+
+                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
+                startService(myIntent);
+
+
+                //mSmartObjectInteraction = new SmartObjectInteraction(mService);
+                //mSmartObjectInteraction.setBeaconCommand(beaconCommand);
+                //mSmartObjectInteraction.interact();
+
+
+             /*mSmartCoreInteraction = new SmartCoreInteraction(mService);
              // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
                 mSmartCoreInteraction.checkForSmartEnvironment();
+                */
             }
         }
     }

@@ -1,5 +1,7 @@
 package com.unime.beacontest.objectinteraction;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
@@ -28,7 +30,7 @@ import static com.unime.beacontest.AES256.encrypt;
  * | 1 Byte Category | 1 Byte ID |
  */
 
-public class BeaconCommand {
+public class BeaconCommand implements Parcelable {
     private static final String BEACON_COMMAND_TAG = "BeaconCommand";
 
     private static final int COUNTER_SIZE = 8;
@@ -58,7 +60,6 @@ public class BeaconCommand {
     private byte[] userId = new byte[USER_ID_SIZE]; // hex
     private byte[] objectId = new byte [OBJECT_ID_SIZE]; // hex
 
-    // TODO refactor this class
     public BeaconCommand() {
         zeros(getDataPayload());
         ones(getDataPayload(), BITMAP_OFFSET, 1);
@@ -69,7 +70,7 @@ public class BeaconCommand {
     }
 
     public void setCounter(UnsignedLong counter) {
-        byte[] counterBytes = Longs.toByteArray(counter.longValue()); //TODO verify if it works
+        byte[] counterBytes = Longs.toByteArray(counter.longValue());
 
         System.arraycopy(counterBytes, 0, dataPayload, COUNTER_INDEX, COUNTER_SIZE);
     }
@@ -115,8 +116,6 @@ public class BeaconCommand {
         userId = BaseEncoding.base16().decode(hexUserId);
     }
 
-
-
     public void setObjectId(String hexObjectId) {
         objectId = BaseEncoding.base16().decode(hexObjectId);
     }
@@ -161,10 +160,42 @@ public class BeaconCommand {
         }
     }
 
+    // Bitmap set to 11111111
     private void ones(byte[] data, int off, int len) {
         for(int i = off, size = off + len; i < size; i++) {
             data[i] = (byte) 0xFF;
         }
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeByteArray(this.dataPayload);
+        dest.writeByteArray(this.encryptedDataPayload);
+        dest.writeByteArray(this.userId);
+        dest.writeByteArray(this.objectId);
+    }
+
+    protected BeaconCommand(Parcel in) {
+        this.dataPayload = in.createByteArray();
+        this.encryptedDataPayload = in.createByteArray();
+        this.userId = in.createByteArray();
+        this.objectId = in.createByteArray();
+    }
+
+    public static final Parcelable.Creator<BeaconCommand> CREATOR = new Parcelable.Creator<BeaconCommand>() {
+        @Override
+        public BeaconCommand createFromParcel(Parcel source) {
+            return new BeaconCommand(source);
+        }
+
+        @Override
+        public BeaconCommand[] newArray(int size) {
+            return new BeaconCommand[size];
+        }
+    };
 }

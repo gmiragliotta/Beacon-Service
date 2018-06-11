@@ -10,7 +10,7 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.unime.beacontest.AES256;
 import com.unime.beacontest.Settings;
-import com.unime.beacontest.beacon.BeaconService;
+import com.unime.beacontest.beacon.BeaconService2;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
@@ -47,13 +46,13 @@ public class SmartCoreInteraction {
     public static final int MAX_ACK_RETRY = 2;
     public static final int MAX_CONN_RETRY = 2;
 
-    private BeaconService beaconService;
+    private BeaconService2 beaconService;
     private String helloIv;
     private String objectId;
     private int ackRetryCounter = 0;
     private int connRetryCounter = 0;
 
-    public SmartCoreInteraction(BeaconService beaconService) {
+    public SmartCoreInteraction(BeaconService2 beaconService) {
         this.beaconService = beaconService;
     }
 
@@ -142,7 +141,7 @@ public class SmartCoreInteraction {
         return false;
     };
 
-    public List<String> getPasswords(Set<BeaconModel> results) {
+    public List<String> getPasswords(List<BeaconModel> results) {
         List<String> passwords = new ArrayList<>();
 
         for(BeaconModel result : results) {

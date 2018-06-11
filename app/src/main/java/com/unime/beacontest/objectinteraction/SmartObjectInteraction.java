@@ -1,12 +1,15 @@
 package com.unime.beacontest.objectinteraction;
 
+import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.beacon.BeaconService;
 import com.unime.beacontest.Settings;
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.BeaconService;
 import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
@@ -17,6 +20,8 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
  */
 
 public class SmartObjectInteraction {
+    private static SmartObjectInteraction instance;
+
     private static final String SMART_OBJECT_INTERACTION_TAG = "SmartObjectInteraction";
     private static final int SENDING_DURATION_MILLIS = 300;
     // private static final int SENDING_DELAY = 0;
@@ -30,13 +35,25 @@ public class SmartObjectInteraction {
     private BeaconService beaconService;
     private int retryCounter = 0;
 
-    public SmartObjectInteraction(BeaconService beaconService) {
-        this.beaconService = beaconService;
+    private SmartObjectInteraction(Context context) {
+        this.beaconService = new BeaconService(context);
+    }
+
+    public static SmartObjectInteraction getInstance(Context context) {
+        if(instance == null) {
+            instance = new SmartObjectInteraction(context);
+        }
+
+        return instance;
     }
 
     public void incRetryCounter() {
         retryCounter++;
     } // TODO counter overflow
+
+    public void resetCounter() {
+        retryCounter = 0;
+    }
 
     public int getRetryCounter() {
         return retryCounter;
@@ -61,18 +78,21 @@ public class SmartObjectInteraction {
     public void interact() {
         beaconService.sending(beaconCommand.build(), SENDING_DURATION_MILLIS);
 
-        Handler delayScan = new Handler();
+        HandlerThread handlerThread = new HandlerThread("BeaconScanHandlerThread");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+
+        Handler delayScan = new Handler(looper);
         delayScan.postDelayed(
-                () -> beaconService.scanning(
-                        ackFilter,
-                        Settings.SIGNAL_THRESHOLD,
-                        SCANNING_DURATION_MILLIS,
-                        ACTION_SCAN_ACK
-                ), SCANNING_DELAY_MILLIS
+                () -> {
+                    beaconService.scanning(
+                            ackFilter,
+                            Settings.SIGNAL_THRESHOLD,
+                            SCANNING_DURATION_MILLIS,
+                            ACTION_SCAN_ACK,
+                            handlerThread
+                    );
+                }, SCANNING_DELAY_MILLIS
         );
     }
-
-
-
-
 }
