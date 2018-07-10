@@ -26,12 +26,20 @@ public class BeaconService {
     public BeaconService(Context context) {
         this.context = context;
 
+
+
         BeaconParser beaconParser = new BeaconParser().setBeaconLayout("m:2-3=beac,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25");
         beaconTransmitter = new BeaconTransmitter(getContext(), beaconParser);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         beaconTransmitter.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY);
 
+        /* // todo enable this check
+        if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
+
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            context.startActivity(enableBtIntent);
+        }*/
     }
 
     public Context getContext() {

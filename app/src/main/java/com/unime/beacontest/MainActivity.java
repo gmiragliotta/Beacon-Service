@@ -1,5 +1,6 @@
 package com.unime.beacontest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -59,26 +60,8 @@ public class MainActivity extends AppCompatActivity {
                 Settings.USER_ID = idUser;
             }
 
-
-                /*
-                BeaconCommand beaconCommand = new BeaconCommand();
-                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-                beaconCommand.setCounter(Settings.counter);
-                beaconCommand.setCommandType("01");
-                beaconCommand.setCommandClass("00");
-                beaconCommand.setCommandOpCode("01");
-                beaconCommand.setParameters("00", "00");
-                beaconCommand.setUserId(Settings.USER_ID);
-                beaconCommand.setObjectId(Settings.OBJECT_ID);
-
-                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
-                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
-                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
-
-                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
-                startService(myIntent);
-
-                */
+            Intent intent = new Intent(this, ClassifierActivity.class);
+            startActivity(intent);
         }
 
     }
