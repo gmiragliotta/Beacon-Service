@@ -15,6 +15,8 @@ import com.unime.beacontest.Settings;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 
+import java.math.BigInteger;
+
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
@@ -94,38 +96,32 @@ public class SmartObjectIntentService extends IntentService {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), Settings.key, Settings.iv);
 
+                    UnsignedLong counterReceived =
+                            UnsignedLong.valueOf(new BigInteger(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END), 16));
+
                     // Start Debug logs
                     Log.d(TAG, "verifyAck clear: " + clear);
                     Log.d(TAG, "verifyAck first check -> " +
-                            UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
-                                    .equals(counter.plus(UnsignedLong.valueOf(1))) + " " + counter.toString());
+                            counterReceived.equals(counter.plus(UnsignedLong.valueOf(1))) + " " + counter.toString());
                     Log.d(TAG, "verifyAck: second check -> " +
                             clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
                     // End Debug logs
 
-                    // TODO change here counter check. What if raspberry increment counter but i don't receive the ack?
                     // i have to increment my counter if the ack counter is less then mine
                     if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Settings.USER_ID)) {
                         Log.d(TAG, "Is it an ack: ok");
 
-
-                        // my counter + 1 is less than smart object counter?
-                        if(counter.plus(UnsignedLong.valueOf(1))
-                                .compareTo(UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))) < 0) {
-                            Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
-                            Log.d(TAG, "New counter value -> " + Settings.counter.toString());
-
-                            Log.d(TAG, "Counter is less than " +
-                                    UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END)));
-
-                        } else if (UnsignedLong.valueOf(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END))
-                                .compareTo(counter.plus(UnsignedLong.valueOf(1))) == 0) {
+                       if (counterReceived.compareTo(counter.plus(UnsignedLong.valueOf(1))) == 0) {
                             Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
                             Log.d(TAG, "New counter value -> " + Settings.counter.toString());
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
-                        } else {
+                        } else if(counter.compareTo(counterReceived) < 0) {
+                           Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
+                           Log.d(TAG, "New counter value -> " + Settings.counter.toString());
+                       } else {
+                           // TODO My counter is g.t. rasp counter. Should decrement it?
                             Log.d(TAG, "Counter do not match!");
                         }
                     }
@@ -137,7 +133,7 @@ public class SmartObjectIntentService extends IntentService {
 
             if(!ackFounded) {
                 Log.d(TAG, "verifyAck: Not Founded");
-                Log.d(TAG, "verifyAck: counter" + Settings.counter);
+                Log.d(TAG, "verifyAck: counter " + Settings.counter);
 
                 if((mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
                     mSmartObjectInteraction.incRetryCounter();

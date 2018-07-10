@@ -87,11 +87,7 @@ public class ConversionUtils {
     }
 
     public static String byteToHex(byte[] data) {
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<data.length; i++) {
-            sb.append(String.format("%02x", data[i]));
-        }
-        return sb.toString();
+        return BaseEncoding.base16().lowerCase().encode(data);
     }
 
     public static byte[] hexToBytes(String data) {

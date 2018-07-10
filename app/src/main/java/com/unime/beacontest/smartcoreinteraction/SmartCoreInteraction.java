@@ -118,7 +118,7 @@ public class SmartCoreInteraction {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
 
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
-            setObjectId(getHelloIv().substring(28,32));
+            setObjectId(getHelloIv().substring(28,32)); // 2 bytes - minor
 
             Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv() + "objid" + getHelloIv());
 
