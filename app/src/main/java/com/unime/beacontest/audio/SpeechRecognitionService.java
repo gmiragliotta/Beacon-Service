@@ -1,5 +1,6 @@
 package com.unime.beacontest.audio;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -12,12 +13,15 @@ public class SpeechRecognitionService extends Service {
 
     @Override
     public void onCreate() {
+
         mSpeechRecognitionManager = new SpeechRecognition(this);
         mSpeechRecognitionManager.createSpeechRecognizer();
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(SPEECH_RECOGNITION_SERVICE_TAG, "onStartCommand");
         String smartObjectName = intent.getStringExtra("SmartObject");
         mSpeechRecognitionManager.startListening(smartObjectName);
         return super.onStartCommand(intent, flags, startId);
@@ -29,6 +33,7 @@ public class SpeechRecognitionService extends Service {
         return null;
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void onDestroy() {
         Log.d(SPEECH_RECOGNITION_SERVICE_TAG, "onDestroy");

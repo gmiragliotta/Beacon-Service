@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Size;
@@ -152,15 +153,23 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                             resultsView = (ResultsView) findViewById(R.id.results);
                         }
                         // TODO: check which of the two instruction have to be commented out
-                        String prediction = results.get(0).getTitle();
-//                        String prediction = "lamp";
+                        //String prediction = results.get(0).getTitle();
+                        String prediction = "lamp";
                         double confidence = results.get(0).getConfidence();
+
+                        Log.d(TAG, "run: confidence " + confidence);
 
 
                         // check if the speech regonition has to been Triggered
                         if(SpeechRecognitionTrigger.hasToBeTriggered(prediction, confidence, lastProcessingTimeMs) && commandCanBeStarted) {
+                            Log.d(TAG, "run: commandHasToBeTriggered");
                             commandCanBeStarted = false;
                             trySpeech(prediction);
+
+                            // ready to accept another command // TODO refactoring here: avoid hard code
+                            Handler handler = new Handler();
+                            handler.postDelayed(
+                                    () -> commandCanBeStarted = true, 6000);
                         }
 
                         resultsView.setResults(results);
@@ -171,7 +180,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
     }
 
     public void trySpeech(String smartObjectName) {
-        mSpeechIntentService = new Intent(ClassifierActivity.this, SpeechRecognitionService.class);
+        mSpeechIntentService = new Intent(this, SpeechRecognitionService.class);
         mSpeechIntentService.putExtra("SmartObject", smartObjectName);
         startService(mSpeechIntentService);
     }

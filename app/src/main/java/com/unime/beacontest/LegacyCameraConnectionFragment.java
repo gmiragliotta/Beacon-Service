@@ -15,8 +15,8 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.unime.tensorflowproject.env.ImageUtils;
-import com.unime.tensorflowproject.env.Logger;
+import com.unime.beacontest.env.ImageUtils;
+import com.unime.beacontest.env.Logger;
 
 import java.io.IOException;
 import java.util.List;
