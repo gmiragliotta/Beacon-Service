@@ -127,7 +127,7 @@ public class SmartObjectIntentService extends IntentService {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "verifyAck: " + e.getMessage());
-                    e.printStackTrace(); // TODO Number format exception, check where is the problem
+                    e.printStackTrace();
                 }
             }
 

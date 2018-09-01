@@ -28,8 +28,7 @@ public class SmartObjectInteraction {
     private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS;
     private static final int SCANNING_DELAY_MILLIS = 100;
     public static final int MAX_ACK_RETRY = 2;
-    public static final String ACK_VALUE = "ffffff";
-    private static final String SMART_OBJECT_ID = "0000";
+    private static final String ACK_VALUE = "ffffff";
 
     private BeaconCommand beaconCommand;
     private BeaconService beaconService;
@@ -68,7 +67,7 @@ public class SmartObjectInteraction {
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
         if(BeaconModel.isAltBeacon(data) && (manufacturerId == Settings.MANUFACTURER_ID) &&
-                BeaconModel.findMinor(data).equals(SMART_OBJECT_ID)) {
+                BeaconModel.findMinor(data).equals(Settings.OBJECT_ID)) {
             Log.d(SMART_OBJECT_INTERACTION_TAG, "ackFilter: " + BaseEncoding.base16().lowerCase().encode(data));
             return true;
         }

@@ -1,21 +1,16 @@
 package com.unime.beacontest;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.unime.beacontest.beacon.BeaconService2;
-import com.unime.beacontest.beacon.BeaconService2.LocalBinder;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
@@ -34,9 +29,6 @@ import static com.unime.beacontest.objectinteraction.SmartObjectIntentService.EX
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
-
-    BeaconService2 mService;
-    boolean mBound = false;
 
     private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
     private NetworkStateBroadcastReceiver networkStateBroadcastReceiver = new NetworkStateBroadcastReceiver();
@@ -72,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // Bind to LocalService
-        Intent intent = new Intent(this, BeaconService2.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         registerReceiver(beaconBroadcastReceiver, beaconIntentFilter);
         registerReceiver(networkStateBroadcastReceiver, networkIntentFilter);
@@ -83,8 +72,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        unbindService(mConnection);
-        mBound = false;
+
         unregisterReceiver(beaconBroadcastReceiver);
         unregisterReceiver(networkStateBroadcastReceiver);
     }
@@ -94,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     public void onButtonClick(View v) {
         int buttonClickedId = v.getId();
         Log.d(TAG, "onButtonClick: start");
-        if (mBound) {
+
             Log.d(TAG, "onButtonClick: bounded");
             // Call a method from the LocalService.
             // However, if this call were something that might hang, then this request should
@@ -102,40 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             if(buttonClickedId == R.id.btnSend) {
-                /*
-                //String command = editTextCommand.getText().toString();
-                //String counter = editTextCounter.getText().toString();
-                //String idObject = editIdObj.getText().toString();
-                //String idUser = editIdUser.getText().toString();
-                //String command = "0123456789";
-                String counter = "255";
-                //String idObject = "1234";
-                //String idUser = "7689";
-
-
-                BeaconCommand beaconCommand = new BeaconCommand();
-                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-                beaconCommand.setCounter(UnsignedLong.valueOf(counter));
-                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
-                beaconCommand.setCommandClass("01");
-                beaconCommand.setCommandOpCode("00");
-                beaconCommand.setParameters("00", "00");
-                beaconCommand.setUserId("0001");
-                beaconCommand.setObjectId("01", "02");
-                // beaconCommand.randomizeReserved();
-
-                mService.sending(beaconCommand.build(), 15000);
-            } else {
-                CustomFilter.Builder builder = new CustomFilter.Builder();
-                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 0,1));
-                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0001", 3,4));
-                //builder.addFilter(new Filter(Filter.UUID_TYPE, "0000", 14, 15));
-                //builder.addFilter(new Filter(Filter.MAJOR_TYPE, "07", 1, 1));
-                //builder.addFilter(new Filter(Filter.MINOR_TYPE, "09", 1, 1));
-                CustomFilter customFilter = builder.build();
-                mService.scanning(customFilter, -70, 5000);
-            }
-            */
 
                 // test invio comando
                 BeaconCommand beaconCommand = new BeaconCommand();
@@ -165,29 +119,10 @@ public class MainActivity extends AppCompatActivity {
              // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
                 mSmartCoreInteraction.checkForSmartEnvironment();
                 */
-            }
+
         }
     }
 
-    /** Defines callbacks for service binding, passed to bindService() */
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            Log.d(TAG, "onServiceConnected: start");
-            LocalBinder binder = (LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
-            Log.d(TAG, "onServiceConnected: end");
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 
     public class BeaconBroadcastReceiver extends BroadcastReceiver {
         private static final String TAG = "BeaconBroadcastReceiver";
@@ -197,20 +132,12 @@ public class MainActivity extends AppCompatActivity {
             // TODO do something with this data
             Log.d(TAG, "BeaconBroadcastReceiver: action " + intent.getAction());
 
-            if(Objects.equals(intent.getAction(), ACTION_SCAN_ACK)) { // TODO check if it works
+            if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
 
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
-                if(null != mSmartObjectInteraction && mBound) {
-                    mService.verifyAck(beaconResults, mSmartObjectInteraction);
-                }
-            } else if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
-                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-
-                Log.d(TAG, "onReceive: " + beaconResults.getResults());
-
-                if(null != mSmartCoreInteraction && mBound) {
+                if(null != mSmartCoreInteraction) {
                     Log.d(TAG, "onReceive: sendHelloAck");
                     if(mSmartCoreInteraction.getHelloIv() != null) {
                         mSmartCoreInteraction.sendHelloAck();
