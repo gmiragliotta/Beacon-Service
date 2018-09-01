@@ -117,7 +117,7 @@ public class SmartObjectIntentService extends IntentService {
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
-                        } else if(counter.compareTo(counterReceived) < 0) {
+                        } else if(counter.compareTo(counterReceived) < 0) { // TODO maybe remove this
                            Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
                            Log.d(TAG, "New counter value -> " + Settings.counter.toString());
                        } else {

@@ -153,8 +153,8 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                             resultsView = (ResultsView) findViewById(R.id.results);
                         }
                         // TODO: check which of the two instruction have to be commented out
-                        //String prediction = results.get(0).getTitle();
-                        String prediction = "lamp";
+                        String prediction = results.get(0).getTitle();
+                        //String prediction = "lamp";
                         double confidence = results.get(0).getConfidence();
 
                         Log.d(TAG, "run: confidence " + confidence);

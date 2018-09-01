@@ -108,7 +108,7 @@ public class CommandTrigger {
 
             beaconCommand.setCommandType("01");
             beaconCommand.setCommandClass("00");
-            beaconCommand.setCommandOpCode("01");
+            beaconCommand.setCommandOpCode("04");
             beaconCommand.setParameters("00", "00");
 
         } else if (command.equals("turn off")) {
@@ -116,7 +116,7 @@ public class CommandTrigger {
 
             beaconCommand.setCommandType("01");
             beaconCommand.setCommandClass("00");
-            beaconCommand.setCommandOpCode("00");
+            beaconCommand.setCommandOpCode("05");
             beaconCommand.setParameters("00", "00");
         } else {
             return null;
