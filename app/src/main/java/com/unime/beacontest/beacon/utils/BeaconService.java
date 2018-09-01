@@ -65,7 +65,7 @@ public class BeaconService {
             mCanceller.postDelayed(() -> {
                 beaconTransmitter.stopAdvertising();
                 Log.d(BEACON_SERVICE_TAG, "Advertisement stopped after " + delayMillis + " ms");
-                handlerThread.quitSafely();
+                handlerThread.quit();
             }, delayMillis);
         }
     }

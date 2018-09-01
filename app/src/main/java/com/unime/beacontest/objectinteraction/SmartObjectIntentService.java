@@ -143,7 +143,7 @@ public class SmartObjectIntentService extends IntentService {
                 }
             }
 
-            handlerThread.quitSafely();
+            handlerThread.quit();
         });
     }
 }

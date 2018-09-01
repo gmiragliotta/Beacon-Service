@@ -103,7 +103,7 @@ public class BeaconReceiver {
             getContext().startService(intent);
 
             // Terminate thread
-            handlerThread.quitSafely();
+            handlerThread.quit();
         }, scanDuration);
 
         return new ScanCallback() {
