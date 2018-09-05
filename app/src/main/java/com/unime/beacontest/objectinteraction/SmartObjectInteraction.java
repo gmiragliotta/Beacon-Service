@@ -28,7 +28,7 @@ public class SmartObjectInteraction {
     private static final int SCANNING_DURATION_MILLIS = SENDING_DURATION_MILLIS;
     private static final int SCANNING_DELAY_MILLIS = 100;
     public static final int MAX_ACK_RETRY = 2;
-    private static final String ACK_VALUE = "ffffff";
+    public static final String ACK_VALUE = "ffffff";
 
     private BeaconCommand beaconCommand;
     private BeaconService beaconService;

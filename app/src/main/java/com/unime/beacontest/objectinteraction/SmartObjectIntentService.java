@@ -101,27 +101,26 @@ public class SmartObjectIntentService extends IntentService {
 
                     // Start Debug logs
                     Log.d(TAG, "verifyAck clear: " + clear);
-                    Log.d(TAG, "verifyAck first check -> " +
-                            counterReceived.equals(counter.plus(UnsignedLong.valueOf(1))) + " " + counter.toString());
-                    Log.d(TAG, "verifyAck: second check -> " +
+                    Log.d(TAG, "verifyAck: check ackValue and userId -> " +
                             clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
                     // End Debug logs
 
                     // i have to increment my counter if the ack counter is less then mine
                     if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Settings.USER_ID)) {
-                        Log.d(TAG, "Is it an ack: ok");
+                        Log.d(TAG, "Is it an ack: yes");
 
-                       if (counterReceived.compareTo(counter.plus(UnsignedLong.valueOf(1))) == 0) {
-                            Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
+                        UnsignedLong counterPlusOne = counter.plus(UnsignedLong.ONE);
+
+                       if (counterReceived.compareTo(counterPlusOne) == 0) {
+                            Settings.counter = counterPlusOne;
                             Log.d(TAG, "New counter value -> " + Settings.counter.toString());
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
                         } else if(counter.compareTo(counterReceived) < 0) {
-                           Settings.counter = Settings.counter.plus(UnsignedLong.valueOf(1));
+                           Settings.counter = counterPlusOne;
                            Log.d(TAG, "New counter value -> " + Settings.counter.toString());
                        } else {
-                           // TODO My counter is g.t. rasp counter. Should decrement it?
                             Log.d(TAG, "Counter do not match!");
                         }
                     }

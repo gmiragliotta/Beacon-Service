@@ -49,7 +49,6 @@ public class BeaconReceiver {
         return context;
     }
 
-
     public void setAction(String action) {
         this.action = action;
     }
@@ -59,7 +58,7 @@ public class BeaconReceiver {
     }
 
     // start scanning and return a BeaconResults instance
-    public void startScanning(int signalThreshold, int scanDuration) { // todo qui
+    public void startScanning(int signalThreshold, int scanDuration) {
         Log.d(TAG, "startScanning");
         this.signalThreshold = signalThreshold;
         this.scanDuration = scanDuration;
@@ -82,33 +81,35 @@ public class BeaconReceiver {
     }
 
     private ScanCallback getScanCallback() {
-        final Handler scanHandler = new Handler();
+        // TODO CHECK final Handler scanHandler = new Handler();
         final Handler mCanceller = new Handler();
 
         mCanceller.postDelayed(() -> {
             if (!wasDetected) {
                 Log.d(TAG, "No beacon detected after " + scanDuration  + " ms: stopScanning");
+            } else {
+                wasDetected = false;
             }
             Log.d(TAG, "Stop scanning after " + scanDuration  + " ms");
-           // Log.d(TAG, "Stop scanning after " + scanDuration  + " ms " + getAction());
             mBluetoothLeScanner.stopScan(callback);
 
             // start the right service and pass the results
             Intent intent = new Intent(getContext(), chooseService(getAction()));
 
             intent.setAction(getAction());
-            Log.d(TAG, "getScanCallback: " + beaconResults);
             intent.putExtra(BEACON_RESULTS, beaconResults);
 
             getContext().startService(intent);
 
             // Terminate thread
+            Log.d(TAG, "getScanCallback: quitting thread");
             handlerThread.quit();
         }, scanDuration);
 
         return new ScanCallback() {
             @Override
             public void onScanResult(int callbackType, final ScanResult result) {
+                final Handler scanHandler = new Handler();
                 final int RSSI = result.getRssi();
 
                 if (RSSI >= signalThreshold) {
@@ -120,7 +121,6 @@ public class BeaconReceiver {
                                 if(null != filter) {
                                     if (filter.apply(data)) {
                                         processResult(data, result);
-                                        //Log.d(BEACON_COMMAND_TAG, "run: " + ++numberOfBeaconDetected);
                                         wasDetected = true;
                                     }
                                 } else { // No filter!

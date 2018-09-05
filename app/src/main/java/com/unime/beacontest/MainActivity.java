@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
 
                 Log.d(TAG, "onReceive: Passwords " + passwords);
-                // todo try all passwords?
+                // todo try all passwords, for now just the first one?
                 if (passwords.size() >= 1) {
                     mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
                     Log.d(TAG, "onReceive: ooooooooooo password: " + passwords.get(0));

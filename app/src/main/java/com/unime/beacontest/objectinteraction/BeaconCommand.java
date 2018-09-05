@@ -27,7 +27,6 @@ import static com.unime.beacontest.AES256.encrypt;
  * | 1 Byte CMD Type | 1 Byte CMD Class | 1 Byte CMD OP Code | 2 Bytes Parameters | 1 Byte BITMAP |
  *
  * 2 Bytes Object ID:
- * | 1 Byte Category | 1 Byte ID |
  */
 
 public class BeaconCommand implements Parcelable {

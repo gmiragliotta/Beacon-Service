@@ -1,17 +1,18 @@
 package com.unime.beacontest.smartcoreinteraction;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.unime.beacontest.AES256;
 import com.unime.beacontest.Settings;
-import com.unime.beacontest.beacon.BeaconService2;
 import com.unime.beacontest.beacon.utils.BeaconModel;
+import com.unime.beacontest.beacon.utils.BeaconService;
 import com.unime.beacontest.beacon.utils.Filter;
 import com.unime.beacontest.beacon.utils.ScanFilterUtils;
 
@@ -46,13 +47,14 @@ public class SmartCoreInteraction {
     public static final int MAX_ACK_RETRY = 2;
     public static final int MAX_CONN_RETRY = 2;
 
-    private BeaconService2 beaconService;
+    private BeaconService beaconService;
     private String helloIv;
     private String objectId;
     private int ackRetryCounter = 0;
     private int connRetryCounter = 0;
 
-    public SmartCoreInteraction(BeaconService2 beaconService) {
+    // TODO it's the wrong beaconService...
+    public SmartCoreInteraction(BeaconService beaconService) {
         this.beaconService = beaconService;
     }
 
@@ -179,8 +181,11 @@ public class SmartCoreInteraction {
         wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
         // wifiConfiguration.hiddenSSID = true;
         wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
-        WifiManager wifiManager = (WifiManager) beaconService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        SharedPreferences sharedPref = beaconService.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        // TODO change here to actual service
+       // WifiManager wifiManager = (WifiManager) beaconService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        //SharedPreferences sharedPref = beaconService.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        WifiManager wifiManager = null;
+        SharedPreferences sharedPref = null;
 
         boolean wifiConfigFounded = false;
         int netId;
@@ -240,14 +245,21 @@ public class SmartCoreInteraction {
 
     public void checkForSmartEnvironment () {
         Log.d(SMART_CORE_INTERACTION_TAG, "checkForSmartEnvironment: start");
-        Handler delayScan = new Handler();
+        HandlerThread handlerThread = new HandlerThread("BeaconScanSmartEnv");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+
+        Handler delayScan = new Handler(looper);
         delayScan.postDelayed(
-                () -> beaconService.scanning(
-                        helloBroadcastFilter,
-                        Settings.SIGNAL_THRESHOLD,
-                        SCANNING_DURATION_SMART_ENV,
-                        ACTION_SCAN_SMART_ENV
-                ), SCANNING_DELAY_MILLIS
+                () -> {
+                    beaconService.scanning(
+                            helloBroadcastFilter,
+                            Settings.SIGNAL_THRESHOLD,
+                            SCANNING_DURATION_SMART_ENV,
+                            ACTION_SCAN_SMART_ENV,
+                            handlerThread
+                    );
+                }, SCANNING_DELAY_MILLIS
         );
     }
 
@@ -268,14 +280,21 @@ public class SmartCoreInteraction {
     }
 
     public void checkForWifiPassword() {
-        Handler delayScan = new Handler();
+        HandlerThread handlerThread = new HandlerThread("BeaconScanWifi");
+        handlerThread.start();
+        Looper looper = handlerThread.getLooper();
+
+        Handler delayScan = new Handler(looper);
         delayScan.postDelayed(
-                () -> beaconService.scanning(
-                        wifiFilter,
-                        Settings.SIGNAL_THRESHOLD,
-                        SCANNING_DURATION_WIFI_PSK,
-                        ACTION_SCAN_PSK
-                ), SCANNING_DELAY_MILLIS_PSK
+                () -> {
+                    beaconService.scanning(
+                            wifiFilter,
+                            Settings.SIGNAL_THRESHOLD,
+                            SCANNING_DURATION_WIFI_PSK,
+                            ACTION_SCAN_PSK,
+                            handlerThread
+                    );
+                }, SCANNING_DELAY_MILLIS_PSK
         );
     }
 
