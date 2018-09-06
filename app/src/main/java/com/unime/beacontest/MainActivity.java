@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         // TODO add actions here when adding custom actions
         beaconIntentFilter.addAction(ACTION_SCAN_ACK);
         beaconIntentFilter.addAction(ACTION_SCAN_SMART_ENV);
-        beaconIntentFilter.addAction(ACTION_SCAN_PSK);
+        beaconIntentFilter.addAction(ACTION_WIFI_CONN);
 
         networkIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
@@ -143,9 +143,8 @@ public class MainActivity extends AppCompatActivity {
                         mSmartCoreInteraction.sendHelloAck();
                         mSmartCoreInteraction.checkForWifiPassword();
                     }
-
                 }
-            } else if (Objects.equals(intent.getAction(), ACTION_SCAN_PSK)) {
+            } else if (Objects.equals(intent.getAction(), ACTION_WIFI_CONN)) {
                 BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
                 List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
 

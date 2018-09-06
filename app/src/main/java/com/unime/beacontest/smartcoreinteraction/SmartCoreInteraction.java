@@ -1,5 +1,6 @@
 package com.unime.beacontest.smartcoreinteraction;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 
 public class SmartCoreInteraction {
@@ -47,15 +48,26 @@ public class SmartCoreInteraction {
     public static final int MAX_ACK_RETRY = 2;
     public static final int MAX_CONN_RETRY = 2;
 
+    private static SmartCoreInteraction instance = null;
     private BeaconService beaconService;
+
     private String helloIv;
     private String objectId;
+
     private int ackRetryCounter = 0;
     private int connRetryCounter = 0;
 
     // TODO it's the wrong beaconService...
-    public SmartCoreInteraction(BeaconService beaconService) {
-        this.beaconService = beaconService;
+    private SmartCoreInteraction(Context context) {
+        this.beaconService = new BeaconService(context);
+    }
+
+    public static SmartCoreInteraction getInstance(Context context) {
+        if(instance == null) {
+            instance = new SmartCoreInteraction(context);
+        }
+
+        return instance;
     }
 
     private String getObjectId(){
@@ -82,8 +94,9 @@ public class SmartCoreInteraction {
         }
     }
 
+    // todo check if it's necessary
     public void resetAckRetryCounter() {
-        // todo check if it's necessary
+
         if(ackRetryCounter == MAX_ACK_RETRY) {
             ackRetryCounter = 0;
         }
@@ -122,7 +135,7 @@ public class SmartCoreInteraction {
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
             setObjectId(getHelloIv().substring(28,32)); // 2 bytes - minor
 
-            Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv() + "objid" + getHelloIv());
+            Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv());
 
             return true;
         }
@@ -291,7 +304,7 @@ public class SmartCoreInteraction {
                             wifiFilter,
                             Settings.SIGNAL_THRESHOLD,
                             SCANNING_DURATION_WIFI_PSK,
-                            ACTION_SCAN_PSK,
+                            ACTION_WIFI_CONN,
                             handlerThread
                     );
                 }, SCANNING_DELAY_MILLIS_PSK

@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class BeaconResults implements Parcelable {
     public static final String BEACON_RESULTS = "BeaconResults";
+
     private Set<BeaconModel> founded;
     private List<BeaconModel> foundedList;
 
