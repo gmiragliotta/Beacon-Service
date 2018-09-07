@@ -170,7 +170,6 @@ public class BeaconReceiver {
                 chosenService = SmartObjectIntentService.class;
                 break;
             case ACTION_SCAN_SMART_ENV:
-                chosenService = SmartCoreService.class;
             case ACTION_WIFI_CONN:
                 chosenService = SmartCoreService.class;
                 break;

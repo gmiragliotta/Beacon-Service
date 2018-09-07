@@ -6,33 +6,22 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.objectinteraction.BeaconCommand;
-import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
+import com.unime.beacontest.smartcoreinteraction.SmartCoreService;
 
-import java.util.List;
-import java.util.Objects;
-
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
-import static com.unime.beacontest.objectinteraction.SmartObjectIntentService.EXTRA_BEACON_COMMAND;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
-    private BeaconBroadcastReceiver beaconBroadcastReceiver = new BeaconBroadcastReceiver();
     private NetworkStateBroadcastReceiver networkStateBroadcastReceiver = new NetworkStateBroadcastReceiver();
-    private IntentFilter beaconIntentFilter = new IntentFilter();
     private IntentFilter networkIntentFilter = new IntentFilter();
 
     private EditText editTextCounter;
@@ -48,10 +37,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // TODO add actions here when adding custom actions
-        beaconIntentFilter.addAction(ACTION_SCAN_ACK);
-        beaconIntentFilter.addAction(ACTION_SCAN_SMART_ENV);
-        beaconIntentFilter.addAction(ACTION_WIFI_CONN);
 
         networkIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
@@ -65,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        registerReceiver(beaconBroadcastReceiver, beaconIntentFilter);
         registerReceiver(networkStateBroadcastReceiver, networkIntentFilter);
     }
 
@@ -73,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        unregisterReceiver(beaconBroadcastReceiver);
         unregisterReceiver(networkStateBroadcastReceiver);
     }
 
@@ -91,72 +74,42 @@ public class MainActivity extends AppCompatActivity {
 
             if(buttonClickedId == R.id.btnSend) {
 
-                // test invio comando
-                BeaconCommand beaconCommand = new BeaconCommand();
-                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-                beaconCommand.setCounter(Settings.counter);
-                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
-                beaconCommand.setCommandClass("00");
-                beaconCommand.setCommandOpCode("01");
-                beaconCommand.setParameters("00", "00");
-                beaconCommand.setUserId(Settings.USER_ID);
-                beaconCommand.setObjectId(Settings.OBJECT_ID);
-
-                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
-                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
-                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
-
-                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
-                startService(myIntent);
-
-
-                //mSmartObjectInteraction = new SmartObjectInteraction(mService);
-                //mSmartObjectInteraction.setBeaconCommand(beaconCommand);
-                //mSmartObjectInteraction.interact();
+//                // test invio comando
+//                BeaconCommand beaconCommand = new BeaconCommand();
+//                // beaconCommand.setBitmap((byte)0b11111111); // it works!
+//                beaconCommand.setCounter(Settings.counter);
+//                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
+//                beaconCommand.setCommandClass("00");
+//                beaconCommand.setCommandOpCode("01");
+//                beaconCommand.setParameters("00", "00");
+//                beaconCommand.setUserId(Settings.USER_ID);
+//                beaconCommand.setObjectId(Settings.OBJECT_ID);
+//
+//                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
+//                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
+//                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
+//
+//                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
+//                startService(myIntent);
 
 
-             /*mSmartCoreInteraction = new SmartCoreInteraction(mService);
+                // it works fine
+             mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
+             mSmartCoreInteraction.checkForSmartEnvironment();
              // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
-                mSmartCoreInteraction.checkForSmartEnvironment();
-                */
+                Handler handler = new Handler();
+
+                handler.postDelayed(() -> {
+                    Intent myIntent = new Intent(this, SmartCoreService.class);
+                    myIntent.setAction(ACTION_SCAN_PSK);
+                    startService(myIntent);
+                }, 2000);
 
         }
     }
 
 
-    public class BeaconBroadcastReceiver extends BroadcastReceiver {
-        private static final String TAG = "BeaconBroadcastReceiver";
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO do something with this data
-            Log.d(TAG, "BeaconBroadcastReceiver: action " + intent.getAction());
-
-            if (Objects.equals(intent.getAction(), ACTION_SCAN_SMART_ENV)) { // TODO check if it works
-                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-
-                Log.d(TAG, "onReceive: " + beaconResults.getResults());
-
-                if(null != mSmartCoreInteraction) {
-                    Log.d(TAG, "onReceive: sendHelloAck");
-                    if(mSmartCoreInteraction.getHelloIv() != null) {
-                        mSmartCoreInteraction.sendHelloAck();
-                        mSmartCoreInteraction.checkForWifiPassword();
-                    }
-                }
-            } else if (Objects.equals(intent.getAction(), ACTION_WIFI_CONN)) {
-                BeaconResults beaconResults = (BeaconResults) intent.getSerializableExtra(BEACON_RESULTS);
-                List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
-
-                Log.d(TAG, "onReceive: Passwords " + passwords);
-                // todo try all passwords, for now just the first one?
-                if (passwords.size() >= 1) {
-                    mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
-                    Log.d(TAG, "onReceive: ooooooooooo password: " + passwords.get(0));
-                }
-            }
-        }
-    }
 
     public class NetworkStateBroadcastReceiver extends BroadcastReceiver {
         @Override

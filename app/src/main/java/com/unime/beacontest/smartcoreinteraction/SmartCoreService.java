@@ -16,7 +16,6 @@ import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class SmartCoreService extends NonStopIntentService {
     private SmartCoreInteraction mSmartCoreInteraction;
-    private BeaconResults beaconResults;
 
     private String TAG = "SmartCoreService";
 
@@ -36,6 +35,8 @@ public class SmartCoreService extends NonStopIntentService {
         if ((intent != null ? intent.getAction() : null) == null) {
             return;
         }
+
+        BeaconResults beaconResults;
 
         switch (intent.getAction()) {
             case ACTION_SCAN_SMART_ENV:

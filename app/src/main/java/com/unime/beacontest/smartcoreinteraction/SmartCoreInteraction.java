@@ -24,14 +24,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.unime.beacontest.Settings.HELLO_BROADCAST_ID;
+import static com.unime.beacontest.Settings.HELLO_BROADCAST_MAJOR;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 
 public class SmartCoreInteraction {
     private static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
-
-    private static final String HELLO_BROADCAST_ID = "00000000";
-    private static final String HELLO_BROADCAST_MAJOR = "ffff";
     private static final String HELLO_ACK_ID = "ffffffff";
 
     private static final int SCANNING_DURATION_SMART_ENV = 1000;
@@ -57,7 +56,6 @@ public class SmartCoreInteraction {
     private int ackRetryCounter = 0;
     private int connRetryCounter = 0;
 
-    // TODO it's the wrong beaconService...
     private SmartCoreInteraction(Context context) {
         this.beaconService = new BeaconService(context);
     }
@@ -188,17 +186,15 @@ public class SmartCoreInteraction {
     }
 
 
-    public void connectToWifi(String ssid, String psk) { // TODO it works?
+    public void connectToWifi(String ssid, String psk) {
 
         WifiConfiguration wifiConfiguration = new WifiConfiguration();
         wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
         // wifiConfiguration.hiddenSSID = true;
         wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
-        // TODO change here to actual service
-       // WifiManager wifiManager = (WifiManager) beaconService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        //SharedPreferences sharedPref = beaconService.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        WifiManager wifiManager = null;
-        SharedPreferences sharedPref = null;
+
+        WifiManager wifiManager = (WifiManager) beaconService.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        SharedPreferences sharedPref = beaconService.getContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);;
 
         boolean wifiConfigFounded = false;
         int netId;
