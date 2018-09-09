@@ -199,8 +199,6 @@ public class SmartCoreInteraction {
         boolean wifiConfigFounded = false;
         int netId;
 
-        // TODO hidden ssid wificonfig flag
-
         if(wifiManager == null) {
             return;
         }
@@ -208,19 +206,25 @@ public class SmartCoreInteraction {
         if(!wifiManager.isWifiEnabled()) {
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: wifiDisabled. Enabling wifi...");
             wifiManager.setWifiEnabled(true);
-            return;
         }
 
         List<WifiConfiguration> wifiConfigurations = wifiManager.getConfiguredNetworks();
         // Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi wificonf " + wifiConfigurations);
         for (WifiConfiguration wifiConfig : wifiConfigurations) {
-            // Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: " + wifiConfig.SSID);
+
+            // Check if ssid and the networkId match. We check even the networkId, because the user
+            // could add a wifi with the same ssid.
+            // N.B. if there is already a network with the same ssid, wifiManager.addNetwork(wifiConfiguration)
+            // return -1
             if (wifiConfig.SSID.equals("\"" + ssid + "\"") &&
                     sharedPref.getInt(NET_ID_PREF_KEY, -1) == wifiConfig.networkId) {
                 wifiConfigFounded = true;
                 wifiConfiguration.networkId = wifiConfig.networkId;
-                Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + psk);
+                Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + psk + "sono qui" + wifiConfiguration.networkId);
             }
+
+
+            Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + wifiConfig.preSharedKey + " netId " + wifiConfig.networkId);
         }
 
         if(wifiConfigFounded) {
@@ -228,10 +232,12 @@ public class SmartCoreInteraction {
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: updateNetwork " + netId);
         } else {
             netId = wifiManager.addNetwork(wifiConfiguration);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt(NET_ID_PREF_KEY, netId);
-            editor.apply();
-            Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: addNetwork " + netId);
+            if(netId != -1) {
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putInt(NET_ID_PREF_KEY, netId);
+                editor.apply();
+                Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: addNetwork " + netId);
+            }
         }
 
         if(netId != -1) {
@@ -241,16 +247,10 @@ public class SmartCoreInteraction {
             boolean isEnabled = wifiManager.enableNetwork(netId, true);
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isEnabled " + isEnabled);
 
-            // TODO reconnect() doesn't return true if the connection to our network is successfull.
             boolean isReconnected = wifiManager.reconnect();
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isReconnected " + isReconnected);
-
-            // TODO stampa dati precedenti alla riconnessione a volte. Una soluzione è quella di utilizzare il braodcast receiver
-            // Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: " + wifiManager.getConnectionInfo());
         }
     }
-
-
 
     public void checkForSmartEnvironment () {
         Log.d(SMART_CORE_INTERACTION_TAG, "checkForSmartEnvironment: start");
