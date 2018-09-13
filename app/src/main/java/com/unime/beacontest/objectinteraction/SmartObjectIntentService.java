@@ -33,6 +33,8 @@ public class SmartObjectIntentService extends IntentService {
     private static final int COMMAND_INDEX_START = 16;
     private static final int COMMAND_INDEX_END = 26;
 
+    private Config mConfig;
+
     public SmartObjectIntentService() {
         super("SmartObjectIntentService");
     }
@@ -43,6 +45,8 @@ public class SmartObjectIntentService extends IntentService {
         Log.d(TAG, "onCreate");
 
         mSmartObjectInteraction = SmartObjectInteraction.getInstance(getApplicationContext());
+        mConfig = Config.getInstance(getApplicationContext());
+
         Log.d(TAG, "onCreate: " + getApplicationContext() + " " + this);
     }
 
@@ -65,7 +69,7 @@ public class SmartObjectIntentService extends IntentService {
                 mSmartObjectInteraction.setBeaconCommand(beaconCommand);
                 mSmartObjectInteraction.interact();
                 break;
-            case ACTION_SCAN_ACK: // TODO rename this
+            case ACTION_SCAN_ACK:
                 BeaconResults beaconResults = intent.getParcelableExtra(BEACON_RESULTS);
 
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
@@ -89,12 +93,12 @@ public class SmartObjectIntentService extends IntentService {
 
             boolean ackFounded = false;
 
-            UnsignedLong counter = Config.counter;
+            UnsignedLong counter = mConfig.getCounter();
 
             for(BeaconModel beaconModel : beaconResults.getResults()) {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
-                            beaconModel.getClearUuid()), Config.key, Config.iv);
+                            beaconModel.getClearUuid()), mConfig.getKey(), mConfig.getIv());
 
                     UnsignedLong counterReceived =
                             UnsignedLong.valueOf(new BigInteger(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END), 16));
@@ -102,24 +106,24 @@ public class SmartObjectIntentService extends IntentService {
                     // Start Debug logs
                     Log.d(TAG, "verifyAck clear: " + clear);
                     Log.d(TAG, "verifyAck: check ackValue and userId -> " +
-                            clear.substring(16, 26).equals(ACK_VALUE + Config.USER_ID));
+                            clear.substring(16, 26).equals(ACK_VALUE + mConfig.getUserId()));
                     // End Debug logs
 
                     // i have to increment my counter if the ack counter is less then mine
-                    if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Config.USER_ID)) {
+                    if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + mConfig.getUserId())) {
                         Log.d(TAG, "Is it an ack: yes");
 
                         UnsignedLong counterPlusOne = counter.plus(UnsignedLong.ONE);
 
                        if (counterReceived.compareTo(counterPlusOne) == 0) {
-                            Config.counter = counterPlusOne;
-                            Log.d(TAG, "New counter value -> " + Config.counter.toString());
+                            mConfig.setCounter(counterPlusOne.toString());
+                            Log.d(TAG, "New counter value -> " + mConfig.getCounter());
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
                         } else if(counter.compareTo(counterReceived) < 0) {
-                           Config.counter = counterPlusOne;
-                           Log.d(TAG, "New counter value -> " + Config.counter.toString());
+                           mConfig.setCounter(counterPlusOne.toString());
+                           Log.d(TAG, "New counter value -> " + mConfig.getCounter());
                        } else {
                             Log.d(TAG, "Counter do not match!");
                         }
@@ -132,7 +136,7 @@ public class SmartObjectIntentService extends IntentService {
 
             if(!ackFounded) {
                 Log.d(TAG, "verifyAck: Not Founded");
-                Log.d(TAG, "verifyAck: counter " + Config.counter);
+                Log.d(TAG, "verifyAck: counter " + mConfig.getCounter());
 
                 if((mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
                     mSmartObjectInteraction.incRetryCounter();

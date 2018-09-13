@@ -24,20 +24,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.Config.HELLO_BROADCAST_ID;
-import static com.unime.beacontest.Config.HELLO_BROADCAST_MAJOR;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 
 public class SmartCoreInteraction {
     private static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
     private static final String HELLO_ACK_ID = "ffffffff";
 
     private static final int SCANNING_DURATION_SMART_ENV = 1000;
-    private static final int SCANNING_DURATION_WIFI_PSK = 1500; // todo occhio
+    private static final int SCANNING_DURATION_WIFI_PSK = 1500; // todo optimize
     private static final int SCANNING_DELAY_MILLIS = 0;
     private static final int SCANNING_DELAY_MILLIS_PSK = 150;
-    private static final int SENDING_DURATION_MILLIS = 1300; // todo occhio
+    private static final int SENDING_DURATION_MILLIS = 1300; // todo optimize
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
@@ -56,8 +54,11 @@ public class SmartCoreInteraction {
     private int ackRetryCounter = 0;
     private int connRetryCounter = 0;
 
+    private Config mConfig;
+
     private SmartCoreInteraction(Context context) {
         this.beaconService = new BeaconService(context);
+        mConfig = Config.getInstance(context);
     }
 
     public static SmartCoreInteraction getInstance(Context context) {
@@ -119,9 +120,9 @@ public class SmartCoreInteraction {
         String helloBroadcastId = ScanFilterUtils.getHelloBroadcastId(data);
 
         if (BeaconModel.isAltBeacon(data) &&
-                (manufacturerId == Config.MANUFACTURER_ID) &&
-                helloBroadcastId.equals(HELLO_BROADCAST_ID) &&
-                BeaconModel.findMajor(data).equals(HELLO_BROADCAST_MAJOR)) {
+                (manufacturerId == mConfig.getManufacturerId()) &&
+                helloBroadcastId.equals(mConfig.getHelloBroadcastId()) &&
+                BeaconModel.findMajor(data).equals(mConfig.getHelloBroadcastMajor())) {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
 
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
@@ -138,9 +139,9 @@ public class SmartCoreInteraction {
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
         if (BeaconModel.isAltBeacon(data) &&
-                (manufacturerId == Config.MANUFACTURER_ID) &&
-                BeaconModel.findMajor(data).equals(Config.USER_ID) &&
-                BeaconModel.findMinor(data).equals(Config.OBJECT_ID)) {
+                (manufacturerId == mConfig.getManufacturerId()) &&
+                BeaconModel.findMajor(data).equals(mConfig.getUserId()) &&
+                BeaconModel.findMinor(data).equals(mConfig.getSmartCoreId())) {
 
             return true;
         }
@@ -169,7 +170,7 @@ public class SmartCoreInteraction {
                     BaseEncoding.base16().lowerCase().decode(
                             AES256.decrypt(
                                     BaseEncoding.base16().lowerCase().decode(result.getClearUuid()),
-                                    Config.key,
+                                    mConfig.getKey(),
                                     BaseEncoding.base16().lowerCase().decode(getHelloIv())
                             )), StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -182,7 +183,7 @@ public class SmartCoreInteraction {
     public void connectToWifi(String ssid, String psk) {
 
         WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.SSID = String.format("\"%s\"", Config.ssid);
+        wifiConfiguration.SSID = String.format("\"%s\"", mConfig.getSsid());
         // wifiConfiguration.hiddenSSID = true;
         wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
 
@@ -257,7 +258,7 @@ public class SmartCoreInteraction {
                 () -> {
                     beaconService.scanning(
                             helloBroadcastFilter,
-                            Config.SIGNAL_THRESHOLD,
+                            mConfig.getSignalThreshold(),
                             SCANNING_DURATION_SMART_ENV,
                             ACTION_SCAN_SMART_ENV,
                             handlerThread
@@ -271,9 +272,9 @@ public class SmartCoreInteraction {
 
         Beacon helloAck = new Beacon.Builder()
                 .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0, 24)))
-                .setId2(Config.USER_ID)
+                .setId2(mConfig.getUserId())
                 .setId3(getObjectId())
-                .setManufacturer(Config.MANUFACTURER_ID)
+                .setManufacturer(mConfig.getManufacturerId())
                 .setTxPower(Config.TX_POWER)
                 .setRssi(Config.RSSI)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
@@ -292,7 +293,7 @@ public class SmartCoreInteraction {
                 () -> {
                     beaconService.scanning(
                             wifiFilter,
-                            Config.SIGNAL_THRESHOLD,
+                            mConfig.getSignalThreshold(),
                             SCANNING_DURATION_WIFI_PSK,
                             ACTION_WIFI_CONN,
                             handlerThread

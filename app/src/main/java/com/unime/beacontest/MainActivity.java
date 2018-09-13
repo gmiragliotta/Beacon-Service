@@ -5,18 +5,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.unime.beacontest.objectinteraction.BeaconCommand;
+import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreService;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
+import java.util.Arrays;
+
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
+import static com.unime.beacontest.objectinteraction.SmartObjectIntentService.EXTRA_BEACON_COMMAND;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -78,36 +82,40 @@ public class MainActivity extends AppCompatActivity {
 
             if(buttonClickedId == R.id.btnSend) {
 
+                String[] objectsId = {"0000", "0001"};
+
+                Config.getInstance(this).setObjectsId(Arrays.asList(objectsId));
+
 //                // test invio comando
-//                BeaconCommand beaconCommand = new BeaconCommand();
-//                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-//                beaconCommand.setCounter(Config.counter);
-//                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
-//                beaconCommand.setCommandClass("00");
-//                beaconCommand.setCommandOpCode("01");
-//                beaconCommand.setParameters("00", "00");
-//                beaconCommand.setUserId(Config.USER_ID);
-//                beaconCommand.setObjectId(Config.OBJECT_ID);
+                BeaconCommand beaconCommand = new BeaconCommand();
+                // beaconCommand.setBitmap((byte)0b11111111); // it works!
+                beaconCommand.setCounter(Config.getInstance(this).getCounter());
+                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
+                beaconCommand.setCommandClass("00");
+                beaconCommand.setCommandOpCode("01");
+                beaconCommand.setParameters("00", "00");
+                beaconCommand.setUserId(Config.getInstance(this).getUserId());
+                beaconCommand.setObjectId("0000");
+
+                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
+                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
+                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
+
+                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
+                startService(myIntent);
+
+
+//                // it works fine
+//                mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
+//                mSmartCoreInteraction.checkForSmartEnvironment();
+//                // mSmartCoreInteraction.connectToWifi(Config.ssid, "starwars");
+//                Handler handler = new Handler();
 //
-//                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
-//                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
-//                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
-//
-//                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
-//                startService(myIntent);
-
-
-                // it works fine
-             mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
-             mSmartCoreInteraction.checkForSmartEnvironment();
-             // mSmartCoreInteraction.connectToWifi(Config.ssid, "starwars");
-                Handler handler = new Handler();
-
-                handler.postDelayed(() -> {
-                    Intent myIntent = new Intent(this, SmartCoreService.class);
-                    myIntent.setAction(ACTION_SCAN_PSK);
-                    startService(myIntent);
-                }, 2000);
+//                handler.postDelayed(() -> {
+//                    Intent myIntent = new Intent(this, SmartCoreService.class);
+//                    myIntent.setAction(ACTION_SCAN_PSK);
+//                    startService(myIntent);
+//                }, 2000);
 
         }
     }
@@ -127,7 +135,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
 }

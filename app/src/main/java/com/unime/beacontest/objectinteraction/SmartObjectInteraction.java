@@ -34,8 +34,12 @@ public class SmartObjectInteraction {
     private BeaconService beaconService;
     private int retryCounter = 0;
 
+    private Config mConfig;
+
     private SmartObjectInteraction(Context context) {
         this.beaconService = new BeaconService(context);
+
+        mConfig = Config.getInstance(context);
     }
 
     public static SmartObjectInteraction getInstance(Context context) {
@@ -48,7 +52,7 @@ public class SmartObjectInteraction {
 
     public void incRetryCounter() {
         retryCounter++;
-    } // TODO counter overflow
+    }
 
     public void resetCounter() {
         retryCounter = 0;
@@ -66,8 +70,8 @@ public class SmartObjectInteraction {
         //String hexData = BaseEncoding.base16().encode(data);
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
-        if(BeaconModel.isAltBeacon(data) && (manufacturerId == Config.MANUFACTURER_ID) &&
-                BeaconModel.findMinor(data).equals(Config.OBJECT_ID)) {
+        if(BeaconModel.isAltBeacon(data) && (manufacturerId == mConfig.getManufacturerId()) &&
+                mConfig.getObjectsId().contains(BeaconModel.findMinor(data))) { // TODO bella storia
             Log.d(SMART_OBJECT_INTERACTION_TAG, "ackFilter: " + BaseEncoding.base16().lowerCase().encode(data));
             return true;
         }
@@ -86,7 +90,7 @@ public class SmartObjectInteraction {
                 () -> {
                     beaconService.scanning(
                             ackFilter,
-                            Config.SIGNAL_THRESHOLD,
+                            mConfig.getSignalThreshold(),
                             SCANNING_DURATION_MILLIS,
                             ACTION_SCAN_ACK,
                             handlerThread
@@ -94,4 +98,6 @@ public class SmartObjectInteraction {
                 }, SCANNING_DELAY_MILLIS
         );
     }
+
+    // BeaconModel.findMinor(data).(Config.OBJECT_ID)) {
 }
