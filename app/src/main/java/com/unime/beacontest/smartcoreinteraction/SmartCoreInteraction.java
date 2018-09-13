@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.unime.beacontest.AES256;
-import com.unime.beacontest.Settings;
+import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconService;
 import com.unime.beacontest.beacon.utils.Filter;
@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.Settings.HELLO_BROADCAST_ID;
-import static com.unime.beacontest.Settings.HELLO_BROADCAST_MAJOR;
+import static com.unime.beacontest.Config.HELLO_BROADCAST_ID;
+import static com.unime.beacontest.Config.HELLO_BROADCAST_MAJOR;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
 
@@ -61,14 +61,14 @@ public class SmartCoreInteraction {
     }
 
     public static SmartCoreInteraction getInstance(Context context) {
-        if(instance == null) {
+        if (instance == null) {
             instance = new SmartCoreInteraction(context);
         }
 
         return instance;
     }
 
-    private String getObjectId(){
+    private String getObjectId() {
         return objectId;
     }
 
@@ -87,23 +87,17 @@ public class SmartCoreInteraction {
     public void incAckRetryCounter() {
         ackRetryCounter++;
 
-        if(ackRetryCounter == MAX_ACK_RETRY) {
-            ackRetryCounter = 0;
-        }
+        Log.d(SMART_CORE_INTERACTION_TAG, "incAckRetryCounter: " + ackRetryCounter);
     }
 
-    // todo check if it's necessary
     public void resetAckRetryCounter() {
-
-        if(ackRetryCounter == MAX_ACK_RETRY) {
-            ackRetryCounter = 0;
-        }
+        ackRetryCounter = 0;
+        Log.d(SMART_CORE_INTERACTION_TAG, "resetAckRetryCounter");
     }
 
     public void resetConnRetryCounter() {
-        if(connRetryCounter == MAX_CONN_RETRY) {
-            connRetryCounter = 0;
-        }
+        connRetryCounter = 0;
+        Log.d(SMART_CORE_INTERACTION_TAG, "resetConnRetryCounter");
     }
 
     public int getAckRetryCounter() {
@@ -116,6 +110,7 @@ public class SmartCoreInteraction {
 
     public void incConnRetryCounter() {
         connRetryCounter++;
+        Log.d(SMART_CORE_INTERACTION_TAG, "incConnRetryCounter: " + connRetryCounter);
     }
 
     private Filter helloBroadcastFilter = (data) -> {
@@ -123,15 +118,14 @@ public class SmartCoreInteraction {
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
         String helloBroadcastId = ScanFilterUtils.getHelloBroadcastId(data);
 
-        if(BeaconModel.isAltBeacon(data) &&
-                (manufacturerId == Settings.MANUFACTURER_ID) &&
+        if (BeaconModel.isAltBeacon(data) &&
+                (manufacturerId == Config.MANUFACTURER_ID) &&
                 helloBroadcastId.equals(HELLO_BROADCAST_ID) &&
-                BeaconModel.findMajor(data).equals(HELLO_BROADCAST_MAJOR) )
-        {
+                BeaconModel.findMajor(data).equals(HELLO_BROADCAST_MAJOR)) {
             Log.d(SMART_CORE_INTERACTION_TAG, "helloBroadcastFilter: " + BaseEncoding.base16().lowerCase().encode(data));
 
             setHelloIv(ScanFilterUtils.getHelloIv(data)); // 16 bytes
-            setObjectId(getHelloIv().substring(28,32)); // 2 bytes - minor
+            setObjectId(getHelloIv().substring(28, 32)); // 2 bytes - minor
 
             Log.d(SMART_CORE_INTERACTION_TAG, "helloiv: " + getHelloIv());
 
@@ -143,11 +137,10 @@ public class SmartCoreInteraction {
     private Filter wifiFilter = (data) -> {
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
-        if(BeaconModel.isAltBeacon(data) &&
-                (manufacturerId == Settings.MANUFACTURER_ID) &&
-                BeaconModel.findMajor(data).equals(Settings.USER_ID) &&
-                BeaconModel.findMinor(data).equals(Settings.OBJECT_ID) )
-        {
+        if (BeaconModel.isAltBeacon(data) &&
+                (manufacturerId == Config.MANUFACTURER_ID) &&
+                BeaconModel.findMajor(data).equals(Config.USER_ID) &&
+                BeaconModel.findMinor(data).equals(Config.OBJECT_ID)) {
 
             return true;
         }
@@ -157,28 +150,28 @@ public class SmartCoreInteraction {
     public List<String> getPasswords(List<BeaconModel> results) {
         List<String> passwords = new ArrayList<>();
 
-        for(BeaconModel result : results) {
+        for (BeaconModel result : results) {
             // decrypt payload
 
-                String psk = decryptPsk(result);
-                passwords.add(psk);
+            String psk = decryptPsk(result);
+            passwords.add(psk);
 
         }
         return passwords;
     }
 
-    private String decryptPsk (BeaconModel result) {
+    private String decryptPsk(BeaconModel result) {
         String psk = "";
         // Log.d(SMART_CORE_INTERACTION_TAG, "decryptPsk: clearuuid "+result.getClearUuid() +"\n" +
         //     getHelloIv());
         try {
             psk = new String(
-                BaseEncoding.base16().lowerCase().decode(
-                        AES256.decrypt(
-                                BaseEncoding.base16().lowerCase().decode(result.getClearUuid()),
-                                Settings.key,
-                                BaseEncoding.base16().lowerCase().decode(getHelloIv())
-                )),    StandardCharsets.UTF_8);
+                    BaseEncoding.base16().lowerCase().decode(
+                            AES256.decrypt(
+                                    BaseEncoding.base16().lowerCase().decode(result.getClearUuid()),
+                                    Config.key,
+                                    BaseEncoding.base16().lowerCase().decode(getHelloIv())
+                            )), StandardCharsets.UTF_8);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,21 +182,22 @@ public class SmartCoreInteraction {
     public void connectToWifi(String ssid, String psk) {
 
         WifiConfiguration wifiConfiguration = new WifiConfiguration();
-        wifiConfiguration.SSID = String.format("\"%s\"", Settings.ssid);
+        wifiConfiguration.SSID = String.format("\"%s\"", Config.ssid);
         // wifiConfiguration.hiddenSSID = true;
         wifiConfiguration.preSharedKey = String.format("\"%s\"", psk);
 
         WifiManager wifiManager = (WifiManager) beaconService.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        SharedPreferences sharedPref = beaconService.getContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);;
+        SharedPreferences sharedPref = beaconService.getContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        ;
 
         boolean wifiConfigFounded = false;
         int netId;
 
-        if(wifiManager == null) {
+        if (wifiManager == null) {
             return;
         }
 
-        if(!wifiManager.isWifiEnabled()) {
+        if (!wifiManager.isWifiEnabled()) {
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: wifiDisabled. Enabling wifi...");
             wifiManager.setWifiEnabled(true);
         }
@@ -220,19 +214,19 @@ public class SmartCoreInteraction {
                     sharedPref.getInt(NET_ID_PREF_KEY, -1) == wifiConfig.networkId) {
                 wifiConfigFounded = true;
                 wifiConfiguration.networkId = wifiConfig.networkId;
-                Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + psk + "sono qui" + wifiConfiguration.networkId);
+                Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + psk + " " + wifiConfiguration.networkId);
             }
 
 
-            Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + wifiConfig.preSharedKey + " netId " + wifiConfig.networkId);
+//            Log.d(SMART_CORE_INTERACTION_TAG, "ssid: " + wifiConfig.SSID + " password: " + wifiConfig.preSharedKey + " netId " + wifiConfig.networkId);
         }
 
-        if(wifiConfigFounded) {
+        if (wifiConfigFounded) {
             netId = wifiManager.updateNetwork(wifiConfiguration);
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: updateNetwork " + netId);
         } else {
             netId = wifiManager.addNetwork(wifiConfiguration);
-            if(netId != -1) {
+            if (netId != -1) {
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt(NET_ID_PREF_KEY, netId);
                 editor.apply();
@@ -240,7 +234,7 @@ public class SmartCoreInteraction {
             }
         }
 
-        if(netId != -1) {
+        if (netId != -1) {
             boolean isDisconnected = wifiManager.disconnect();
             Log.d(SMART_CORE_INTERACTION_TAG, "connectToWifi: isDisconnected " + isDisconnected);
 
@@ -252,7 +246,7 @@ public class SmartCoreInteraction {
         }
     }
 
-    public void checkForSmartEnvironment () {
+    public void checkForSmartEnvironment() {
         Log.d(SMART_CORE_INTERACTION_TAG, "checkForSmartEnvironment: start");
         HandlerThread handlerThread = new HandlerThread("BeaconScanSmartEnv");
         handlerThread.start();
@@ -263,7 +257,7 @@ public class SmartCoreInteraction {
                 () -> {
                     beaconService.scanning(
                             helloBroadcastFilter,
-                            Settings.SIGNAL_THRESHOLD,
+                            Config.SIGNAL_THRESHOLD,
                             SCANNING_DURATION_SMART_ENV,
                             ACTION_SCAN_SMART_ENV,
                             handlerThread
@@ -272,16 +266,16 @@ public class SmartCoreInteraction {
         );
     }
 
-    public void sendHelloAck () {
+    public void sendHelloAck() {
         assert getHelloIv() != null;
 
         Beacon helloAck = new Beacon.Builder()
-                .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0,24)))
-                .setId2(Settings.USER_ID)
+                .setId1(HELLO_ACK_ID.concat(getHelloIv().substring(0, 24)))
+                .setId2(Config.USER_ID)
                 .setId3(getObjectId())
-                .setManufacturer(Settings.MANUFACTURER_ID)
-                .setTxPower(Settings.TX_POWER)
-                .setRssi(Settings.RSSI)
+                .setManufacturer(Config.MANUFACTURER_ID)
+                .setTxPower(Config.TX_POWER)
+                .setRssi(Config.RSSI)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
         Log.d(SMART_CORE_INTERACTION_TAG, "sendHelloAck: " + helloAck);
@@ -298,7 +292,7 @@ public class SmartCoreInteraction {
                 () -> {
                     beaconService.scanning(
                             wifiFilter,
-                            Settings.SIGNAL_THRESHOLD,
+                            Config.SIGNAL_THRESHOLD,
                             SCANNING_DURATION_WIFI_PSK,
                             ACTION_WIFI_CONN,
                             handlerThread

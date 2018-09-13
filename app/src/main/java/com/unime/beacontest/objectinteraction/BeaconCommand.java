@@ -7,7 +7,7 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
-import com.unime.beacontest.Settings;
+import com.unime.beacontest.Config;
 
 import org.altbeacon.beacon.Beacon;
 
@@ -130,11 +130,11 @@ public class BeaconCommand implements Parcelable {
         System.arraycopy(dataPayload, 0, payloadToEncrypt, 0, ENCRYPTED_DATA_PAYLOAD_SIZE);
 
         try {
-            encryptedDataPayload = encrypt(payloadToEncrypt, Settings.key, Settings.iv);
+            encryptedDataPayload = encrypt(payloadToEncrypt, Config.getKey(), Config.getIv());
             Log.d(BEACON_COMMAND_TAG, "encrypted: " + BaseEncoding.base16().lowerCase().encode(encryptedDataPayload));
 
             // Just for debugging purposes
-            String decryptedPayload = decrypt(encryptedDataPayload, Settings.key, Settings.iv);
+            String decryptedPayload = decrypt(encryptedDataPayload, Config.getKey(), Config.getIv());
             Log.d(BEACON_COMMAND_TAG, "decrypted: counter: " + decryptedPayload.substring(0,16) +
                     " command: " + decryptedPayload.substring(16,28) + " reserved: " +
                     decryptedPayload.substring(28, 32));
@@ -146,9 +146,9 @@ public class BeaconCommand implements Parcelable {
                 .setId1(BaseEncoding.base16().encode(encryptedDataPayload))
                 .setId2(BaseEncoding.base16().encode(userId))
                 .setId3(BaseEncoding.base16().encode(objectId))
-                .setManufacturer(Settings.MANUFACTURER_ID)
-                .setTxPower(Settings.TX_POWER)
-                .setRssi(Settings.RSSI)
+                .setManufacturer(Config.getManufacturerId())
+                .setTxPower(Config.TX_POWER)
+                .setRssi(Config.RSSI)
                 .setDataFields(Arrays.asList(new Long[]{0l})) // Remove this for beacon layouts without d: fields
                 .build();
     }

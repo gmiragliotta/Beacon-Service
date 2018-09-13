@@ -11,7 +11,7 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
 import com.unime.beacontest.AES256;
-import com.unime.beacontest.Settings;
+import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 
@@ -89,12 +89,12 @@ public class SmartObjectIntentService extends IntentService {
 
             boolean ackFounded = false;
 
-            UnsignedLong counter = Settings.counter;
+            UnsignedLong counter = Config.counter;
 
             for(BeaconModel beaconModel : beaconResults.getResults()) {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
-                            beaconModel.getClearUuid()), Settings.key, Settings.iv);
+                            beaconModel.getClearUuid()), Config.key, Config.iv);
 
                     UnsignedLong counterReceived =
                             UnsignedLong.valueOf(new BigInteger(clear.substring(COUNTER_INDEX_START, COUNTER_INDEX_END), 16));
@@ -102,24 +102,24 @@ public class SmartObjectIntentService extends IntentService {
                     // Start Debug logs
                     Log.d(TAG, "verifyAck clear: " + clear);
                     Log.d(TAG, "verifyAck: check ackValue and userId -> " +
-                            clear.substring(16, 26).equals(ACK_VALUE + Settings.USER_ID));
+                            clear.substring(16, 26).equals(ACK_VALUE + Config.USER_ID));
                     // End Debug logs
 
                     // i have to increment my counter if the ack counter is less then mine
-                    if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Settings.USER_ID)) {
+                    if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + Config.USER_ID)) {
                         Log.d(TAG, "Is it an ack: yes");
 
                         UnsignedLong counterPlusOne = counter.plus(UnsignedLong.ONE);
 
                        if (counterReceived.compareTo(counterPlusOne) == 0) {
-                            Settings.counter = counterPlusOne;
-                            Log.d(TAG, "New counter value -> " + Settings.counter.toString());
+                            Config.counter = counterPlusOne;
+                            Log.d(TAG, "New counter value -> " + Config.counter.toString());
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
                         } else if(counter.compareTo(counterReceived) < 0) {
-                           Settings.counter = counterPlusOne;
-                           Log.d(TAG, "New counter value -> " + Settings.counter.toString());
+                           Config.counter = counterPlusOne;
+                           Log.d(TAG, "New counter value -> " + Config.counter.toString());
                        } else {
                             Log.d(TAG, "Counter do not match!");
                         }
@@ -132,7 +132,7 @@ public class SmartObjectIntentService extends IntentService {
 
             if(!ackFounded) {
                 Log.d(TAG, "verifyAck: Not Founded");
-                Log.d(TAG, "verifyAck: counter " + Settings.counter);
+                Log.d(TAG, "verifyAck: counter " + Config.counter);
 
                 if((mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
                     mSmartObjectInteraction.incRetryCounter();

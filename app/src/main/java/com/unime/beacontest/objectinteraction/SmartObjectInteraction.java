@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.Settings;
+import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconService;
 import com.unime.beacontest.beacon.utils.Filter;
@@ -66,8 +66,8 @@ public class SmartObjectInteraction {
         //String hexData = BaseEncoding.base16().encode(data);
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
-        if(BeaconModel.isAltBeacon(data) && (manufacturerId == Settings.MANUFACTURER_ID) &&
-                BeaconModel.findMinor(data).equals(Settings.OBJECT_ID)) {
+        if(BeaconModel.isAltBeacon(data) && (manufacturerId == Config.MANUFACTURER_ID) &&
+                BeaconModel.findMinor(data).equals(Config.OBJECT_ID)) {
             Log.d(SMART_OBJECT_INTERACTION_TAG, "ackFilter: " + BaseEncoding.base16().lowerCase().encode(data));
             return true;
         }
@@ -86,7 +86,7 @@ public class SmartObjectInteraction {
                 () -> {
                     beaconService.scanning(
                             ackFilter,
-                            Settings.SIGNAL_THRESHOLD,
+                            Config.SIGNAL_THRESHOLD,
                             SCANNING_DURATION_MILLIS,
                             ACTION_SCAN_ACK,
                             handlerThread

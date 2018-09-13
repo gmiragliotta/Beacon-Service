@@ -9,12 +9,14 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.unime.beacontest.Settings;
+import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconResults;
 
 import java.util.List;
+import java.util.Random;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
@@ -22,7 +24,11 @@ import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class SmartCoreService extends NonStopIntentService {
+    public static final String ACTION_SMARTCORE_CONN = "SmartCoreConn";
+    public static final String SMARTCORE_CONN_STATUS = "SmartCoreStatus";
+
     private SmartCoreInteraction mSmartCoreInteraction;
+    private LocalBroadcastManager localBroadcastManager;
 
     private boolean smartCoreConn;
     private final int CONN_CHECK_DELAY_MILLIS = 7500;
@@ -41,9 +47,10 @@ public class SmartCoreService extends NonStopIntentService {
         super.onCreate();
         Log.d(TAG, "onCreate");
         mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         wifiIntentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        //wifiIntentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+
         registerReceiver(wifiReceiver, wifiIntentFilter);
     }
 
@@ -75,10 +82,15 @@ public class SmartCoreService extends NonStopIntentService {
                 List<String> passwords = mSmartCoreInteraction.getPasswords(beaconResults.getResults());
 
                 Log.d(TAG, "onHandleIntent: passwords " + passwords);
-                // todo try all passwords, for now just the first one? use rand func, interesting
+                // pick one password from the scan result
                 if (passwords.size() >= 1) {
-                    mSmartCoreInteraction.connectToWifi(Settings.ssid, passwords.get(0));
-                    //Log.d(TAG, "try password: " + passwords.get(0));
+                    mSmartCoreInteraction.resetAckRetryCounter(); // password received
+
+                    Random rand = new Random();
+                    int i = rand.nextInt(passwords.size());
+
+                    mSmartCoreInteraction.connectToWifi(Config.getInstance(this).getSsid(), passwords.get(i));
+                    Log.d(TAG, "try password 0: " + passwords.get(0));
                     smartCoreConn = false;
 
                     Handler handler = new Handler();
@@ -86,8 +98,28 @@ public class SmartCoreService extends NonStopIntentService {
                     // Check if the connection was successful after 7500 ms
                     handler.postDelayed(() -> {
                         Log.d(TAG, "onHandleIntent: what the heck " + smartCoreConn);
-                        // TODO broadcast just if false, but retry 2 times before that
+                        // local broadcast connection status just if it's false, but retry 2 times before that
+                        if(mSmartCoreInteraction.getConnRetryCounter() == SmartCoreInteraction.MAX_CONN_RETRY && !smartCoreConn){
+                            localBroadcastManager.sendBroadcast(
+                                new Intent(ACTION_SMARTCORE_CONN).putExtra(SMARTCORE_CONN_STATUS, smartCoreConn)
+                            );
+
+                            mSmartCoreInteraction.resetConnRetryCounter();
+                        } else if (!smartCoreConn) {
+                            mSmartCoreInteraction.incConnRetryCounter();
+                            mSmartCoreInteraction.checkForWifiPassword();
+                        } else { // conn successful
+                            mSmartCoreInteraction.resetConnRetryCounter();
+                        }
                     } , CONN_CHECK_DELAY_MILLIS);
+                } else { // i haven't received password
+                    if(mSmartCoreInteraction.getAckRetryCounter() == SmartCoreInteraction.MAX_ACK_RETRY) {
+                        mSmartCoreInteraction.resetAckRetryCounter();
+                    } else {
+                        mSmartCoreInteraction.incAckRetryCounter();
+                        //startService(new Intent(this, SmartCoreService.class).setAction(ACTION_SCAN_PSK));
+                        onHandleIntent(new Intent(this, SmartCoreService.class).setAction(ACTION_SCAN_PSK));
+                    }
                 }
 
                 break;
@@ -127,9 +159,10 @@ public class SmartCoreService extends NonStopIntentService {
                     Log.d(TAG, "onReceive:  " + wifiInfo);
 
                     // todo use netId
-                    if(ssid.equals(Settings.ssid)) {
+                    if(ssid.equals(Config.getInstance(context).getSsid())) {
                         smartCoreConn = true;
-                        // todo broadcast just if true
+                        localBroadcastManager.sendBroadcast(new Intent(ACTION_SMARTCORE_CONN).putExtra(SMARTCORE_CONN_STATUS, true));
+
                     }
                 }
 

@@ -4,9 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     private SmartObjectInteraction mSmartObjectInteraction;
     private SmartCoreInteraction mSmartCoreInteraction;
 
+    private SmartCoreReceiver mSmartCoreReceiver = new SmartCoreReceiver();;
+    private IntentFilter mIntentFilter = new IntentFilter();
+    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,20 +44,24 @@ public class MainActivity extends AppCompatActivity {
         editIdObj = (EditText) findViewById(R.id.idobj);
         editTextCommand = (EditText) findViewById(R.id.command);
         editIdUser = (EditText) findViewById(R.id.iduser);
+
+        mIntentFilter.addAction(SmartCoreService.ACTION_SMARTCORE_CONN);
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-
+        localBroadcastManager.registerReceiver(mSmartCoreReceiver, mIntentFilter);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-
+        localBroadcastManager.unregisterReceiver(mSmartCoreReceiver);
     }
 
     /** Called when a button is clicked (the button in the layout file attaches to
@@ -74,13 +81,13 @@ public class MainActivity extends AppCompatActivity {
 //                // test invio comando
 //                BeaconCommand beaconCommand = new BeaconCommand();
 //                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-//                beaconCommand.setCounter(Settings.counter);
+//                beaconCommand.setCounter(Config.counter);
 //                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
 //                beaconCommand.setCommandClass("00");
 //                beaconCommand.setCommandOpCode("01");
 //                beaconCommand.setParameters("00", "00");
-//                beaconCommand.setUserId(Settings.USER_ID);
-//                beaconCommand.setObjectId(Settings.OBJECT_ID);
+//                beaconCommand.setUserId(Config.USER_ID);
+//                beaconCommand.setObjectId(Config.OBJECT_ID);
 //
 //                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
 //                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
@@ -93,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 // it works fine
              mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
              mSmartCoreInteraction.checkForSmartEnvironment();
-             // mSmartCoreInteraction.connectToWifi(Settings.ssid, "starwars");
+             // mSmartCoreInteraction.connectToWifi(Config.ssid, "starwars");
                 Handler handler = new Handler();
 
                 handler.postDelayed(() -> {
@@ -105,7 +112,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public class SmartCoreReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = (intent.getAction() != null) ? intent.getAction() : "";
 
+            switch(action) {
+                case SmartCoreService.ACTION_SMARTCORE_CONN:
+                    Log.d(TAG, "onReceive: conn status " + intent.getBooleanExtra(SmartCoreService.SMARTCORE_CONN_STATUS, false));
+                    break;
+
+                default:
+                    Log.d(TAG, "onReceive: incorrect action");
+            }
+        }
+    }
 
 
 
