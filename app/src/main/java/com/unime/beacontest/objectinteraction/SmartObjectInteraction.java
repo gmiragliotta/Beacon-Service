@@ -71,7 +71,7 @@ public class SmartObjectInteraction {
         int manufacturerId = ScanFilterUtils.getManufacturerId(data);
 
         if(BeaconModel.isAltBeacon(data) && (manufacturerId == mConfig.getManufacturerId()) &&
-                mConfig.getObjectsId().contains(BeaconModel.findMinor(data))) { // TODO bella storia
+                mConfig.getObjectsId().contains(BeaconModel.findMinor(data))) { // it works
             Log.d(SMART_OBJECT_INTERACTION_TAG, "ackFilter: " + BaseEncoding.base16().lowerCase().encode(data));
             return true;
         }
@@ -98,6 +98,4 @@ public class SmartObjectInteraction {
                 }, SCANNING_DELAY_MILLIS
         );
     }
-
-    // BeaconModel.findMinor(data).(Config.OBJECT_ID)) {
 }
