@@ -1,4 +1,4 @@
-package com.unime.beacontest.objectinteraction;
+package com.unime.ctrlbeacon.objectinteraction;
 
 import android.content.Context;
 import android.os.Handler;
@@ -7,13 +7,13 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.Config;
-import com.unime.beacontest.beacon.utils.BeaconModel;
-import com.unime.beacontest.beacon.utils.BeaconService;
-import com.unime.beacontest.beacon.utils.Filter;
-import com.unime.beacontest.beacon.utils.ScanFilterUtils;
+import com.unime.ctrlbeacon.Config;
+import com.unime.ctrlbeacon.beacon.utils.BeaconModel;
+import com.unime.ctrlbeacon.beacon.utils.BeaconService;
+import com.unime.ctrlbeacon.beacon.utils.Filter;
+import com.unime.ctrlbeacon.beacon.utils.ScanFilterUtils;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 
 /**
  *

@@ -1,4 +1,4 @@
-package com.unime.beacontest.beacon;
+package com.unime.ctrlbeacon.beacon;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,17 +13,17 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
-import com.unime.beacontest.beacon.utils.BeaconModel;
-import com.unime.beacontest.beacon.utils.BeaconResults;
-import com.unime.beacontest.beacon.utils.Filter;
-import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
-import com.unime.beacontest.smartcoreinteraction.SmartCoreService;
+import com.unime.ctrlbeacon.beacon.utils.BeaconModel;
+import com.unime.ctrlbeacon.beacon.utils.BeaconResults;
+import com.unime.ctrlbeacon.beacon.utils.Filter;
+import com.unime.ctrlbeacon.objectinteraction.SmartObjectIntentService;
+import com.unime.ctrlbeacon.smartcoreinteraction.SmartCoreService;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
+import static com.unime.ctrlbeacon.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class BeaconReceiver {
     public static final String TAG = "BeaconReceiver";

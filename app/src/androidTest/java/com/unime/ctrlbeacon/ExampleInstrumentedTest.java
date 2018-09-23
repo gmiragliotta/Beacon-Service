@@ -1,4 +1,4 @@
-package com.unime.beacontest;
+package com.unime.ctrlbeacon;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

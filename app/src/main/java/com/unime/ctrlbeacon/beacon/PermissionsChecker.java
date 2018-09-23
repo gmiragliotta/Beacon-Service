@@ -1,4 +1,4 @@
-package com.unime.beacontest.beacon;
+package com.unime.ctrlbeacon.beacon;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;

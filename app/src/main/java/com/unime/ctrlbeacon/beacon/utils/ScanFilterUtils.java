@@ -1,4 +1,4 @@
-package com.unime.beacontest.beacon.utils;
+package com.unime.ctrlbeacon.beacon.utils;
 
 import com.google.common.io.BaseEncoding;
 

@@ -1,4 +1,4 @@
-package com.unime.beacontest.beacon.utils;
+package com.unime.ctrlbeacon.beacon.utils;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.AdvertiseSettings;
@@ -8,8 +8,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.util.Log;
 
-import com.unime.beacontest.beacon.BeaconReceiver;
-import com.unime.beacontest.beacon.PermissionsChecker;
+import com.unime.ctrlbeacon.beacon.BeaconReceiver;
+import com.unime.ctrlbeacon.beacon.PermissionsChecker;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconParser;

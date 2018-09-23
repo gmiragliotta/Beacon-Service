@@ -1,4 +1,4 @@
-package com.unime.beacontest.objectinteraction;
+package com.unime.ctrlbeacon.objectinteraction;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,15 +7,15 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
-import com.unime.beacontest.Config;
+import com.unime.ctrlbeacon.Config;
 
 import org.altbeacon.beacon.Beacon;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import static com.unime.beacontest.beacon.utils.AES256.decrypt;
-import static com.unime.beacontest.beacon.utils.AES256.encrypt;
+import static com.unime.ctrlbeacon.beacon.utils.AES256.decrypt;
+import static com.unime.ctrlbeacon.beacon.utils.AES256.encrypt;
 
 /* BeaconCommand format.
  *

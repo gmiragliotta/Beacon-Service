@@ -1,4 +1,4 @@
-package com.unime.beacontest.smartcoreinteraction;
+package com.unime.ctrlbeacon.smartcoreinteraction;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,19 +13,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.unime.beacontest.Config;
-import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.ctrlbeacon.Config;
+import com.unime.ctrlbeacon.beacon.utils.BeaconResults;
 
 import java.util.List;
 import java.util.Random;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
-import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
-import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
+import static com.unime.ctrlbeacon.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.ctrlbeacon.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
+import static com.unime.ctrlbeacon.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
 
 public class SmartCoreService extends NonStopIntentService {
     public static final String ACTION_SMARTCORE_CONN = "SmartCoreConn";

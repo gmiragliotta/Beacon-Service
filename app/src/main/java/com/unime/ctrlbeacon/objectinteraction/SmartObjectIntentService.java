@@ -1,4 +1,4 @@
-package com.unime.beacontest.objectinteraction;
+package com.unime.ctrlbeacon.objectinteraction;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -11,17 +11,17 @@ import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
-import com.unime.beacontest.beacon.utils.AES256;
-import com.unime.beacontest.Config;
-import com.unime.beacontest.beacon.utils.BeaconModel;
-import com.unime.beacontest.beacon.utils.BeaconResults;
+import com.unime.ctrlbeacon.beacon.utils.AES256;
+import com.unime.ctrlbeacon.Config;
+import com.unime.ctrlbeacon.beacon.utils.BeaconModel;
+import com.unime.ctrlbeacon.beacon.utils.BeaconResults;
 
 import java.math.BigInteger;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
-import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
-import static com.unime.beacontest.objectinteraction.SmartObjectInteraction.ACK_VALUE;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
+import static com.unime.ctrlbeacon.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.ctrlbeacon.objectinteraction.SmartObjectInteraction.ACK_VALUE;
 
 public class SmartObjectIntentService extends IntentService {
     private SmartObjectInteraction mSmartObjectInteraction;

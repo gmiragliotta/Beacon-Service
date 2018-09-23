@@ -1,4 +1,4 @@
-package com.unime.beacontest.beacon.utils;
+package com.unime.ctrlbeacon.beacon.utils;
 
 import android.support.annotation.NonNull;
 

@@ -1,4 +1,4 @@
-package com.unime.beacontest;
+package com.unime.ctrlbeacon;
 
 import org.junit.Test;
 

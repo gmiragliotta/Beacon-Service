@@ -1,4 +1,4 @@
-package com.unime.beacontest.smartcoreinteraction;
+package com.unime.ctrlbeacon.smartcoreinteraction;
 
 import android.app.Service;
 import android.content.Intent;

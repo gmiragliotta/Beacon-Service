@@ -1,4 +1,4 @@
-package com.unime.beacontest.smartcoreinteraction;
+package com.unime.ctrlbeacon.smartcoreinteraction;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,12 +10,12 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.beacon.utils.AES256;
-import com.unime.beacontest.Config;
-import com.unime.beacontest.beacon.utils.BeaconModel;
-import com.unime.beacontest.beacon.utils.BeaconService;
-import com.unime.beacontest.beacon.utils.Filter;
-import com.unime.beacontest.beacon.utils.ScanFilterUtils;
+import com.unime.ctrlbeacon.beacon.utils.AES256;
+import com.unime.ctrlbeacon.Config;
+import com.unime.ctrlbeacon.beacon.utils.BeaconModel;
+import com.unime.ctrlbeacon.beacon.utils.BeaconService;
+import com.unime.ctrlbeacon.beacon.utils.Filter;
+import com.unime.ctrlbeacon.beacon.utils.ScanFilterUtils;
 
 import org.altbeacon.beacon.Beacon;
 
@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
+import static com.unime.ctrlbeacon.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 
 public class SmartCoreInteraction {
     private static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
