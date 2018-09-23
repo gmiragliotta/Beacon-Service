@@ -21,7 +21,7 @@ import com.unime.beacontest.smartcoreinteraction.SmartCoreService;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_ACK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
@@ -169,7 +169,7 @@ public class BeaconReceiver {
             case ACTION_SEND_COMMAND_OBJ:
                 chosenService = SmartObjectIntentService.class;
                 break;
-            case ACTION_SCAN_SMART_ENV:
+            case ACTION_SCAN_SMART_ENV_RESULTS:
             case ACTION_WIFI_CONN:
                 chosenService = SmartCoreService.class;
                 break;

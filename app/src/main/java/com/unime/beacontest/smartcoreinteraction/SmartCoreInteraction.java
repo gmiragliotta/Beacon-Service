@@ -10,7 +10,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
-import com.unime.beacontest.AES256;
+import com.unime.beacontest.beacon.utils.AES256;
 import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconService;
@@ -24,18 +24,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 
 public class SmartCoreInteraction {
     private static final String SMART_CORE_INTERACTION_TAG = "SmartCoreInteraction";
     private static final String HELLO_ACK_ID = "ffffffff";
 
-    private static final int SCANNING_DURATION_SMART_ENV = 1000;
-    private static final int SCANNING_DURATION_WIFI_PSK = 1500; // todo optimize
+    private static final int SCANNING_DURATION_SMART_ENV = 450;
+    private static final int SCANNING_DURATION_WIFI_PSK = 450;
     private static final int SCANNING_DELAY_MILLIS = 0;
     private static final int SCANNING_DELAY_MILLIS_PSK = 150;
-    private static final int SENDING_DURATION_MILLIS = 1300; // todo optimize
+    private static final int SENDING_DURATION_MILLIS = 450;
     private static final int ENCRYPTED_DATA_PAYLOAD_SIZE = 16;
     private static final int HELLO_IV_SIZE = 16;
 
@@ -189,7 +189,6 @@ public class SmartCoreInteraction {
 
         WifiManager wifiManager = (WifiManager) beaconService.getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         SharedPreferences sharedPref = beaconService.getContext().getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        ;
 
         boolean wifiConfigFounded = false;
         int netId;
@@ -260,7 +259,7 @@ public class SmartCoreInteraction {
                             helloBroadcastFilter,
                             mConfig.getSignalThreshold(),
                             SCANNING_DURATION_SMART_ENV,
-                            ACTION_SCAN_SMART_ENV,
+                            ACTION_SCAN_SMART_ENV_RESULTS,
                             handlerThread
                     );
                 }, SCANNING_DELAY_MILLIS

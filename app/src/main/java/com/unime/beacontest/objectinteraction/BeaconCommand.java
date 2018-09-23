@@ -14,8 +14,8 @@ import org.altbeacon.beacon.Beacon;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import static com.unime.beacontest.AES256.decrypt;
-import static com.unime.beacontest.AES256.encrypt;
+import static com.unime.beacontest.beacon.utils.AES256.decrypt;
+import static com.unime.beacontest.beacon.utils.AES256.encrypt;
 
 /* BeaconCommand format.
  *

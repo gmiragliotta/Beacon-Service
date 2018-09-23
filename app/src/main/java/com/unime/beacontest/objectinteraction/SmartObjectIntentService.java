@@ -6,11 +6,12 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
-import com.unime.beacontest.AES256;
+import com.unime.beacontest.beacon.utils.AES256;
 import com.unime.beacontest.Config;
 import com.unime.beacontest.beacon.utils.BeaconModel;
 import com.unime.beacontest.beacon.utils.BeaconResults;
@@ -26,6 +27,9 @@ public class SmartObjectIntentService extends IntentService {
     private SmartObjectInteraction mSmartObjectInteraction;
 
     public static final String EXTRA_BEACON_COMMAND = "BeaconCommand";
+    public static final String ACTION_COMMAND_EXEC = "BeaconCommandExecution";
+    public static final String SMART_OBJ_COMMAND_EXEC = "CommandExecutionStatus";
+
     private static final String TAG = "SmartObjIntentService";
 
     private static final int COUNTER_INDEX_START = 0;
@@ -34,6 +38,8 @@ public class SmartObjectIntentService extends IntentService {
     private static final int COMMAND_INDEX_END = 26;
 
     private Config mConfig;
+    private LocalBroadcastManager localBroadcastManager;
+
 
     public SmartObjectIntentService() {
         super("SmartObjectIntentService");
@@ -46,6 +52,7 @@ public class SmartObjectIntentService extends IntentService {
 
         mSmartObjectInteraction = SmartObjectInteraction.getInstance(getApplicationContext());
         mConfig = Config.getInstance(getApplicationContext());
+        localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
         Log.d(TAG, "onCreate: " + getApplicationContext() + " " + this);
     }
@@ -59,11 +66,11 @@ public class SmartObjectIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        if((intent != null ? intent.getAction() : null) == null) {
+        if ((intent != null ? intent.getAction() : null) == null) {
             return;
         }
 
-        switch(intent.getAction()) {
+        switch (intent.getAction()) {
             case ACTION_SEND_COMMAND_OBJ:
                 BeaconCommand beaconCommand = intent.getParcelableExtra(EXTRA_BEACON_COMMAND);
                 mSmartObjectInteraction.setBeaconCommand(beaconCommand);
@@ -74,7 +81,7 @@ public class SmartObjectIntentService extends IntentService {
 
                 Log.d(TAG, "onReceive: " + beaconResults.getResults());
 
-                if(null != mSmartObjectInteraction) {
+                if (null != mSmartObjectInteraction) {
                     verifyAck(beaconResults);
                 }
                 break;
@@ -95,7 +102,7 @@ public class SmartObjectIntentService extends IntentService {
 
             UnsignedLong counter = mConfig.getCounter();
 
-            for(BeaconModel beaconModel : beaconResults.getResults()) {
+            for (BeaconModel beaconModel : beaconResults.getResults()) {
                 try {
                     String clear = AES256.decrypt(BaseEncoding.base16().lowerCase().decode(
                             beaconModel.getClearUuid()), mConfig.getKey(), mConfig.getIv());
@@ -110,21 +117,22 @@ public class SmartObjectIntentService extends IntentService {
                     // End Debug logs
 
                     // i have to increment my counter if the ack counter is less then mine
-                    if(clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + mConfig.getUserId())) {
+                    if (clear.substring(COMMAND_INDEX_START, COMMAND_INDEX_END).equals(ACK_VALUE + mConfig.getUserId())) {
                         Log.d(TAG, "Is it an ack: yes");
 
                         UnsignedLong counterPlusOne = counter.plus(UnsignedLong.ONE);
 
-                       if (counterReceived.compareTo(counterPlusOne) == 0) {
+                        if (counterReceived.compareTo(counterPlusOne) == 0) {
                             mConfig.setCounter(counterPlusOne.toString());
                             Log.d(TAG, "New counter value -> " + mConfig.getCounter());
 
                             Log.d(TAG, "Counter match: ok");
                             ackFounded = true;
-                        } else if(counter.compareTo(counterReceived) < 0) {
-                           mConfig.setCounter(counterPlusOne.toString());
-                           Log.d(TAG, "New counter value -> " + mConfig.getCounter());
-                       } else {
+                            localBroadcastManager.sendBroadcast(new Intent(ACTION_COMMAND_EXEC).putExtra(SMART_OBJ_COMMAND_EXEC, true));
+                        } else if (counter.compareTo(counterReceived) < 0) {
+                            mConfig.setCounter(counterPlusOne.toString());
+                            Log.d(TAG, "New counter value -> " + mConfig.getCounter());
+                        } else {
                             Log.d(TAG, "Counter do not match!");
                         }
                     }
@@ -134,15 +142,16 @@ public class SmartObjectIntentService extends IntentService {
                 }
             }
 
-            if(!ackFounded) {
+            if (!ackFounded) {
                 Log.d(TAG, "verifyAck: Not Founded");
                 Log.d(TAG, "verifyAck: counter " + mConfig.getCounter());
 
-                if((mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
+                if ((mSmartObjectInteraction.getRetryCounter() < SmartObjectInteraction.MAX_ACK_RETRY)) {
                     mSmartObjectInteraction.incRetryCounter();
                     mSmartObjectInteraction.interact();
                 } else {
                     mSmartObjectInteraction.resetCounter();
+                    localBroadcastManager.sendBroadcast(new Intent(ACTION_COMMAND_EXEC).putExtra(SMART_OBJ_COMMAND_EXEC, false));
                 }
             }
 

@@ -1,4 +1,4 @@
-package com.unime.beacontest;
+package com.unime.beacontest.beacon.utils;
 
 import android.util.Log;
 

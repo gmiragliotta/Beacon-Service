@@ -5,13 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
-import com.unime.beacontest.objectinteraction.BeaconCommand;
 import com.unime.beacontest.objectinteraction.SmartObjectIntentService;
 import com.unime.beacontest.objectinteraction.SmartObjectInteraction;
 import com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction;
@@ -19,8 +19,7 @@ import com.unime.beacontest.smartcoreinteraction.SmartCoreService;
 
 import java.util.Arrays;
 
-import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SEND_COMMAND_OBJ;
-import static com.unime.beacontest.objectinteraction.SmartObjectIntentService.EXTRA_BEACON_COMMAND;
+import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
 
 public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
@@ -50,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
         editIdUser = (EditText) findViewById(R.id.iduser);
 
         mIntentFilter.addAction(SmartCoreService.ACTION_SMARTCORE_CONN);
+        mIntentFilter.addAction(SmartCoreService.ACTION_SMARTCORE_SCAN);
+        mIntentFilter.addAction(SmartObjectIntentService.ACTION_COMMAND_EXEC);
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
 
     }
@@ -87,35 +88,29 @@ public class MainActivity extends AppCompatActivity {
                 Config.getInstance(this).setObjectsId(Arrays.asList(objectsId));
 
 //                // test invio comando
-                BeaconCommand beaconCommand = new BeaconCommand();
-                // beaconCommand.setBitmap((byte)0b11111111); // it works!
-                beaconCommand.setCounter(Config.getInstance(this).getCounter());
-                beaconCommand.setCommandType("01"); // TODO cast all to integer ? Maybe no
-                beaconCommand.setCommandClass("00");
-                beaconCommand.setCommandOpCode("01");
-                beaconCommand.setParameters("00", "00");
-                beaconCommand.setUserId(Config.getInstance(this).getUserId());
-                beaconCommand.setObjectId("0000");
-
-                Intent myIntent = new Intent(this, SmartObjectIntentService.class);
-                myIntent.setAction(ACTION_SEND_COMMAND_OBJ);
-                myIntent.putExtra(EXTRA_BEACON_COMMAND, beaconCommand);
-
-                Log.d(TAG, "onButtonClick: context " + this + " " + getBaseContext());
-                startService(myIntent);
+//                BeaconCommand beaconCommand = new BeaconCommand();
+//                // beaconCommand.setBitmap((byte)0b11111111); // it works!
+//                beaconCommand.setCounter(Config.getInstance(this).getCounter());
+//                beaconCommand.setCommandType("01");
+//                beaconCommand.setCommandClass("00");
+//                beaconCommand.setCommandOpCode("01");
+//                beaconCommand.setParameters("00", "00");
+//                beaconCommand.setUserId(Config.getInstance(this).getUserId());
+//                beaconCommand.setObjectId("0000");
+//
+//                SmartObjectIntentService.sendCommand(beaconCommand, this);
 
 
 //                // it works fine
-//                mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
-//                mSmartCoreInteraction.checkForSmartEnvironment();
-//                // mSmartCoreInteraction.connectToWifi(Config.ssid, "starwars");
-//                Handler handler = new Handler();
-//
-//                handler.postDelayed(() -> {
-//                    Intent myIntent = new Intent(this, SmartCoreService.class);
-//                    myIntent.setAction(ACTION_SCAN_PSK);
-//                    startService(myIntent);
-//                }, 2000);
+                mSmartCoreInteraction = SmartCoreInteraction.getInstance(this);
+                mSmartCoreInteraction.checkForSmartEnvironment();
+                CtrlBeacon.startSmartEnvScan(this);
+                // mSmartCoreInteraction.connectToWifi(Config.ssid, "starwars");
+                Handler handler = new Handler();
+
+                handler.postDelayed(() -> {
+                    CtrlBeacon.startSmartCoreConn(this);
+                }, 2000);
 
         }
     }
@@ -126,10 +121,15 @@ public class MainActivity extends AppCompatActivity {
             String action = (intent.getAction() != null) ? intent.getAction() : "";
 
             switch(action) {
+                case SmartCoreService.ACTION_SMARTCORE_SCAN:
+                    Log.d(TAG, "onReceive: smart env " + intent.getParcelableExtra(BEACON_RESULTS));
+                    break;
                 case SmartCoreService.ACTION_SMARTCORE_CONN:
                     Log.d(TAG, "onReceive: conn status " + intent.getBooleanExtra(SmartCoreService.SMARTCORE_CONN_STATUS, false));
                     break;
-
+                case SmartObjectIntentService.ACTION_COMMAND_EXEC:
+                    Log.d(TAG, "onReceive: command exec " + intent.getBooleanExtra(SmartObjectIntentService.SMART_OBJ_COMMAND_EXEC, false));
+                    break;
                 default:
                     Log.d(TAG, "onReceive: incorrect action");
             }

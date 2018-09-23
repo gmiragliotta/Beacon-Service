@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -20,11 +21,15 @@ import java.util.Random;
 
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_PSK;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV;
+import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_SCAN_SMART_ENV_RESULTS;
 import static com.unime.beacontest.beacon.ActionsBeaconBroadcastReceiver.ACTION_WIFI_CONN;
 import static com.unime.beacontest.beacon.utils.BeaconResults.BEACON_RESULTS;
+import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.NET_ID_PREF_KEY;
+import static com.unime.beacontest.smartcoreinteraction.SmartCoreInteraction.SHARED_PREF_NAME;
 
 public class SmartCoreService extends NonStopIntentService {
     public static final String ACTION_SMARTCORE_CONN = "SmartCoreConn";
+    public static final String ACTION_SMARTCORE_SCAN = "SmartCoreScanning";
     public static final String SMARTCORE_CONN_STATUS = "SmartCoreStatus";
 
     private SmartCoreInteraction mSmartCoreInteraction;
@@ -65,11 +70,12 @@ public class SmartCoreService extends NonStopIntentService {
 
         switch (intent.getAction()) {
             case ACTION_SCAN_SMART_ENV:
+                mSmartCoreInteraction.checkForSmartEnvironment();
+                break;
+            case ACTION_SCAN_SMART_ENV_RESULTS:
                 beaconResults = intent.getParcelableExtra(BEACON_RESULTS);
                 Log.d(TAG, "beaconResults: " + beaconResults.getResults());
-
-                // todo send local broadcast
-                // bla bla bla
+                localBroadcastManager.sendBroadcast(new Intent(ACTION_SMARTCORE_SCAN).putExtra(BEACON_RESULTS, beaconResults));
                 break;
             case ACTION_SCAN_PSK:
                 if (mSmartCoreInteraction.getHelloIv() != null) {
@@ -95,26 +101,33 @@ public class SmartCoreService extends NonStopIntentService {
 
                     Handler handler = new Handler();
 
+                    // TODO - this code doesn't work, but it's a future optimization
+                    // Currently the smartcore change the IV when it receives a valid hello broadcast,
+                    // but if we leave it like it is, I can't retry properly.
+                    // We should update the smartcore or this code?
+
                     // Check if the connection was successful after 7500 ms
                     handler.postDelayed(() -> {
                         Log.d(TAG, "onHandleIntent: what the heck " + smartCoreConn);
                         // local broadcast connection status just if it's false, but retry 2 times before that
-                        if(mSmartCoreInteraction.getConnRetryCounter() == SmartCoreInteraction.MAX_CONN_RETRY && !smartCoreConn){
+                        if (mSmartCoreInteraction.getConnRetryCounter() == SmartCoreInteraction.MAX_CONN_RETRY && !smartCoreConn) {
                             localBroadcastManager.sendBroadcast(
-                                new Intent(ACTION_SMARTCORE_CONN).putExtra(SMARTCORE_CONN_STATUS, smartCoreConn)
+                                    new Intent(ACTION_SMARTCORE_CONN).putExtra(SMARTCORE_CONN_STATUS, smartCoreConn)
                             );
-
                             mSmartCoreInteraction.resetConnRetryCounter();
+                            // Stop the service
+                            stopSelf();
                         } else if (!smartCoreConn) {
                             mSmartCoreInteraction.incConnRetryCounter();
                             mSmartCoreInteraction.checkForWifiPassword();
                         } else { // conn successful
                             mSmartCoreInteraction.resetConnRetryCounter();
                         }
-                    } , CONN_CHECK_DELAY_MILLIS);
+                    }, CONN_CHECK_DELAY_MILLIS);
                 } else { // i haven't received password
-                    if(mSmartCoreInteraction.getAckRetryCounter() == SmartCoreInteraction.MAX_ACK_RETRY) {
+                    if (mSmartCoreInteraction.getAckRetryCounter() == SmartCoreInteraction.MAX_ACK_RETRY) {
                         mSmartCoreInteraction.resetAckRetryCounter();
+                        stopSelf();
                     } else {
                         mSmartCoreInteraction.incAckRetryCounter();
                         //startService(new Intent(this, SmartCoreService.class).setAction(ACTION_SCAN_PSK));
@@ -143,11 +156,11 @@ public class SmartCoreService extends NonStopIntentService {
         public void onReceive(Context context, Intent intent) {
             NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 
-            if(info != null && info.isConnected()) {
+            if (info != null && info.isConnected()) {
                 // Do your work.
 
                 // e.g. To check the Network Name or other info:
-                WifiManager wifiManager = (WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 WifiInfo wifiInfo = null;
                 if (wifiManager != null) {
                     wifiInfo = wifiManager.getConnectionInfo();
@@ -156,13 +169,15 @@ public class SmartCoreService extends NonStopIntentService {
                     String ssid = wifiInfo.getSSID().replace("\"", "");
                     int netId = wifiInfo.getNetworkId();
 
+                    SharedPreferences sharedPref = context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE);
+                    int netIdSharedPref = sharedPref.getInt(NET_ID_PREF_KEY, -1);
+
                     Log.d(TAG, "onReceive:  " + wifiInfo);
 
-                    // todo use netId
-                    if(ssid.equals(Config.getInstance(context).getSsid())) {
+                    if (ssid.equals(Config.getInstance(context).getSsid()) & (netId == netIdSharedPref)) {
                         smartCoreConn = true;
                         localBroadcastManager.sendBroadcast(new Intent(ACTION_SMARTCORE_CONN).putExtra(SMARTCORE_CONN_STATUS, true));
-
+                        stopSelf();
                     }
                 }
 

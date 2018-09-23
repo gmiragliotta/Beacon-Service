@@ -2,7 +2,6 @@ package com.unime.beacontest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.UnsignedLong;
@@ -193,7 +192,6 @@ public class Config {
     }
 
     public List<String> getObjectsId() {
-        Log.d("PROVAAAAA", "getObjectsId: " + objectsId.contains("0000")); // todo remove
         return objectsId;
     }
 
