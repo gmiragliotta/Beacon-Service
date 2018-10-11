@@ -9,7 +9,7 @@ import android.util.Log;
 import com.google.common.io.BaseEncoding;
 import com.unime.ctrlbeacon.Config;
 import com.unime.ctrlbeacon.beacon.utils.BeaconModel;
-import com.unime.ctrlbeacon.beacon.utils.BeaconService;
+import com.unime.ctrlbeacon.beacon.BeaconService;
 import com.unime.ctrlbeacon.beacon.utils.Filter;
 import com.unime.ctrlbeacon.beacon.utils.ScanFilterUtils;
 
